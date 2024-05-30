@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
       <body>
         <div className="flex ">
           <SideNavbar />
-          <div className="flex-grow p-6">
+          <div className="flex-grow p-6 pl-72">
             
             {children}
           </div>

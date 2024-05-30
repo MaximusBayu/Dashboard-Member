@@ -11,12 +11,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
 
 
-const SideNavbar = ({ isAdmin }) => {
+const SideNavbar = ({ isAdmin = true }) => {
   const router = useRouter();
   const adminName = "Admin";
 
   return (
-    <div className="h-screen w-64 bg-white text-gray-700 flex flex-col items-center py-10 rounded-r-lg border border-gray-300 shadow-xl">
+    <div className="h-screen fixed w-64 bg-white text-gray-700 flex flex-col items-center py-10 rounded-r-lg border border-gray-300 shadow-xl">
       <Avatar
         alt="Admin"
         src="/avatar.jpg"
