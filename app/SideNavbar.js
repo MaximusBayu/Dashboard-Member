@@ -16,7 +16,7 @@ const SideNavbar = ({ isAdmin = true }) => {
   const adminName = "Admin";
 
   return (
-    <div className="h-screen fixed w-64 bg-white text-gray-700 flex flex-col items-center py-10 rounded-r-lg border border-gray-300 shadow-xl">
+    <div className="h-screen fixed top-20 pb-24 w-64 bg-white text-gray-700 flex flex-col items-center py-10 rounded-r-3xl border border-gray-300 shadow-xl">
       <Avatar
         alt="Admin"
         src="/avatar.jpg"
