@@ -10,7 +10,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
 
-const SideNavbar = () => {
+
+const SideNavbar = ({ isAdmin }) => {
   const router = useRouter();
   const adminName = "Admin";
 
@@ -41,48 +42,52 @@ const SideNavbar = () => {
           Beranda
         </Button>
       </div>
-      <div className='w-full px-8'>
-        <Button
-          startIcon={<PersonAddIcon />} 
-          onClick={() => router.push('/add-member')}
-          className="mb-4 pr-7 text-sm text-nowrap hover:shadow-lg"
-          sx={{
-            color: 'grey', 
-            justifyContent: 'start',
-            '&:hover': {
-              backgroundColor: '#B22824',
-              color: 'white',
-            },
-          }}
-        >
-          Register Akun
-        </Button>
-      </div>
-      <div className='w-full px-8'>
-        <Button
-          startIcon={<HistoryIcon />}
-          onClick={() => router.push('/history')}
-          className="mb-4 text-sm max-w-64 hover:shadow-lg"
-          sx={{
-            color: 'grey', 
-            justifyContent: 'start',
-            '&:hover': {
-              backgroundColor: '#B22824',
-              color: 'white',
-            },
-          }}
-        >
-          Riwayat Masukkan
-        </Button>
-      </div>
+      {isAdmin && (
+        <>
+          <div className='w-full px-8'>
+            <Button
+              startIcon={<PersonAddIcon />}
+              onClick={() => router.push('/add-member')}
+              className="mb-4 pr-7 text-sm text-nowrap hover:shadow-lg"
+              sx={{
+                color: 'grey',
+                justifyContent: 'start',
+                '&:hover': {
+                  backgroundColor: '#B22824',
+                  color: 'white',
+                },
+              }}
+            >
+              Register Akun
+            </Button>
+          </div>
+          <div className='w-full px-8'>
+            <Button
+              startIcon={<HistoryIcon />}
+              onClick={() => router.push('/history')}
+              className="mb-4 text-sm max-w-64 hover:shadow-lg"
+              sx={{
+                color: 'grey',
+                justifyContent: 'start',
+                '&:hover': {
+                  backgroundColor: '#B22824',
+                  color: 'white',
+                },
+              }}
+            >
+              Riwayat Masukkan
+            </Button>
+          </div>
+        </>
+      )}
       <div className="flex-1"></div>
       <div className='w-full px-8'>
         <Button
-          startIcon={<SettingsIcon />} 
+          startIcon={<SettingsIcon />}
           onClick={() => router.push('/settings')}
           className="mb-2 pr-20 hover:shadow-lg"
           sx={{
-            color: 'grey', 
+            color: 'grey',
             justifyContent: 'start',
             '&:hover': {
               backgroundColor: '#B22824',
@@ -95,9 +100,9 @@ const SideNavbar = () => {
       </div>
       <div className='w-full px-8'>
         <Button
-          startIcon={<LogoutIcon />} 
+          startIcon={<LogoutIcon />}
           onClick={() => router.push('/logout')}
-          className="mb-4  pr-24 hover:shadow-lg"
+          className="mb-4 pr-24 hover:shadow-lg"
           sx={{
             color: 'grey',
             justifyContent: 'start',
