@@ -1,10 +1,13 @@
-import MemberTable from './MemberList';
+import BasicTextFields from "./input";
+import Loginpage from "./login";
+import Newmember from "./member";
+
 
 export default function Home() {
   return (
-    <div>
-      <h1>Hi</h1>
-      <MemberTable/>
-    </div>
+  <div>
+    <Loginpage/>
+    <Newmember/>
+  </div>
   );
 }

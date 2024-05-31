@@ -2,15 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-.humic-red{
-    color: #B22824;
-    background-color: #B22824;
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
 }
 
-.humic-grey{
-    color: #959499;
-}
 
-.humic-blue{
-    color: #1677BD;
-}
