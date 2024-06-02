@@ -28,6 +28,15 @@ const MemberPage = () => {
     setMemberData({ ...memberData, photo: e.target.files[0] });
   };
 
+  const handleAddEducation = () => {
+    console.log('Education Data Submitted:', educationData);
+
+    setEducationData({
+      educationHistory: '',
+      university: ''
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
   
@@ -79,7 +88,7 @@ const MemberPage = () => {
               name="name"
               value={memberData.name}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border-b-2 border-none"
               placeholder="Tulis Nama"
             />
           </div>
@@ -90,7 +99,7 @@ const MemberPage = () => {
               name="nip"
               value={memberData.nip}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border-b-2 border-none"
               placeholder="Tulis NIP"
             />
           </div>
@@ -101,7 +110,7 @@ const MemberPage = () => {
               name="program"
               value={memberData.program}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border-b-2 border-none"
               placeholder="Tulis Program Studi"
             />
           </div>
@@ -112,7 +121,7 @@ const MemberPage = () => {
               name="faculty"
               value={memberData.faculty}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="ww-full p-2 text-lg border-b-2 border-none"
               placeholder="Pilih Fakultas"
             />
           </div>
@@ -123,7 +132,7 @@ const MemberPage = () => {
               name="birthPlace"
               value={memberData.birthPlace}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border-b-2 border-none"
               placeholder="Tulis Tempat Lahir"
             />
           </div>
@@ -134,24 +143,42 @@ const MemberPage = () => {
               name="phoneNumber"
               value={memberData.phoneNumber}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border border-none"
               placeholder="Tulis Nomor HP"
             />
           </div>
           <div className="mb-5">
             <label className="block font-bold mb-2">Riwayat Pendidikan</label>
-            <textarea
+            <div className="flex items-center w-full">
+            <select
               name="educationHistory"
               value={memberData.educationHistory}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
-              placeholder="Tulis Riwayat Pendidikan"
-            />
+              className="w-full p-2 text-lg border mr-2 border-none"
+            >
+              <option value="">Pilih Pendidikan</option>
+              <option value="S1">S1</option>
+              <option value="S2">S2</option>
+              <option value="S3">S3</option>
+            </select>
+              <input
+                type="text"
+                name="university"
+                value={memberData.university}
+                onChange={handleInputChange}
+                className="w-full p-2 text-lg border mr-2 border-none"
+                placeholder="Tulis Universitas"
+              />
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
+                onClick={handleAddEducation}
+              > + </button>
+            </div>
           </div>
         </div>
         <div className="w-1/2 ml-5">
           <div className="mb-5">
-            <label className="block font-bold mb-2">Jenis Kelamin</label>
+            <label className="block font-bold mb-2 border-none">Jenis Kelamin</label>
             <select
               name="fullName"
               value={memberData.fullName}
@@ -169,7 +196,7 @@ const MemberPage = () => {
               name="religion"
               value={memberData.religion}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border border-none"
             >
               <option value="">Pilih Agama</option>
               <option value="Islam">Islam</option>
@@ -181,23 +208,23 @@ const MemberPage = () => {
             </select>
           </div>
           <div className="mb-5">
-          <label className="block font-bold mb-2">Alamat</label>
-          <input
-            type="text"
-            name="address"
-            value={memberData.address}
-            onChange={handleInputChange}
-            className="w-full p-2 text-lg border"
-            placeholder="Tulis Alamat"
-          />
-        </div>
+            <label className="block font-bold mb-2">Alamat</label>
+            <input
+              type="text"
+              name="address"
+              value={memberData.address}
+              onChange={handleInputChange}
+              className="w-full p-2 text-lg border border-none"
+              placeholder="Tulis Alamat"
+            />
+          </div>
           <div className="mb-5">
             <label className="block font-bold mb-2">Golongan Darah</label>
             <select
               name="bloodType"
               value={memberData.bloodType}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border border-none"
             >
               <option value="">Pilih Golongan Darah</option>
               <option value="A">A</option>
@@ -213,12 +240,12 @@ const MemberPage = () => {
               name="dateOfBirth"
               value={memberData.dateOfBirth}
               onChange={handleInputChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border border-none"
               placeholder="mm/dd/yyyy"
             />
           </div>
         </div>
-        <div className="w-1/2 ml-5">
+        <div className="w-1/4 ml-5">
           <div className="mb-5 flex flex-col items-center">
             <div className="w-64 h-80 bg-gray-200 mb-2"></div>
             <span>Foto 4x6</span>
@@ -229,7 +256,7 @@ const MemberPage = () => {
               type="file"
               name="photo"
               onChange={handleFileChange}
-              className="w-full p-2 text-lg border"
+              className="w-full p-2 text-lg border border-none"
             />
             {memberData.photo && (
               <img
@@ -245,11 +272,11 @@ const MemberPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex justify-between">
-        <div className="flex items-center">
-          <span className="mr-2 text-blue-500 cursor-pointer">Edit</span>
-          <span className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Simpan</span>
-        </div>
+      <div className="flex justify-end">
+          <div className="flex items-center space-x-2">
+            <button type="button" className="text-blue-500 cursor-pointer">Edit</button>
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Simpan</button>
+          </div>
       </div>
     </div>
   );
