@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import SideNavbar from './SideNavbar';
+import MyAppBar from './Appbar';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,10 +14,10 @@ export default function RootLayout({ children }) {
   return (
     <html>
       <body>
+      <MyAppBar />
         <div className="flex ">
           <SideNavbar />
-          <div className="flex-grow p-6 pl-72">
-            
+          <div className="flex-grow pl-72">
             {children}
           </div>
         </div>
