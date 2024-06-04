@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { IconButton } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MemberDialog from './MemberDialog';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -37,6 +37,36 @@ const MemberTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
+    const [printOpen, setPrintOpen] = useState(false);
+    const [printFilter, setPrintFilter] = useState('');
+    const [confirmationOpen, setConfirmationOpen] = useState(false);
+
+    const handlePrintOpen = () => {
+        setPrintOpen(true);
+    };
+
+    const handlePrintClose = () => {
+        setPrintOpen(false);
+    };
+
+    const handlePrintFilterChange = (event) => {
+        setPrintFilter(event.target.value);
+    };
+
+    const handlePrint = () => {
+        setPrintOpen(false);
+        setConfirmationOpen(true);
+    };
+
+    const handleConfirmationClose = () => {
+        setConfirmationOpen(false);
+    };
+
+    const handleConfirmationPrint = () => {
+        console.log('Printed with filter:', printFilter);
+        setPrintFilter(''); 
+        setConfirmationOpen(false);
+    };
 
     const startRange = (currentPage - 1) * itemsPerPage + 1;
     let endRange = currentPage * itemsPerPage;
@@ -112,7 +142,7 @@ const MemberTable = () => {
                             onChange={handleSearchChange}
                             className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                         />
-                        <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center" onClick={() => { }}>
+                        <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center" onClick={handlePrintOpen}>
                             <PrintIcon />
                             <span className="ml-2">Print Data Member</span>
                         </button>
@@ -171,6 +201,52 @@ const MemberTable = () => {
             </div>
 
             <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
+
+            <Dialog open={printOpen} onClose={handlePrintClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Print Member</DialogTitle>
+                <DialogContent>
+                    <FormControl fullWidth className='my-2'>
+                        <InputLabel id="print-filter-label">Filter member by</InputLabel>
+                        <Select
+                            labelId="print-filter-label"
+                            id="print-filter"
+                            value={printFilter}
+                            onChange={handlePrintFilterChange}
+                            label="Filter member by"
+                        >
+                            <MenuItem value="All">All</MenuItem>
+                            <MenuItem value="jurusan">Jurusan</MenuItem>
+                            <MenuItem value="fakultas">Fakultas</MenuItem>
+                            <MenuItem value="aktif">Aktif</MenuItem>
+                            <MenuItem value="tidak aktif">Tidak Aktif</MenuItem>
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions className='p-4'>
+                    <Button onClick={handlePrintClose} variant='text'>
+                        Cancel
+                    </Button>
+                    <Button onClick={handlePrint} variant='contained' autoFocus>
+                        Print
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Confirmation Dialog */}
+            <Dialog open={confirmationOpen} onClose={handleConfirmationClose} maxWidth="sm" fullWidth>
+                <DialogTitle>Print Confirmation</DialogTitle>
+                <DialogContent>
+                    <p>Apakah anda yakin ingin melakukan print pada semua member ini?</p>
+                </DialogContent>
+                <DialogActions className='p-4'>
+                    <Button onClick={handleConfirmationClose} variant='text'>
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmationPrint} variant='contained' autoFocus>
+                        Print
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
