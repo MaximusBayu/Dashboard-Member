@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { IconButton } from '@mui/material';;
+import { IconButton } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MemberDialog from './MemberDialog';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -63,6 +63,7 @@ const MemberTable = () => {
     // Function to handle search input change
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
+        setCurrentPage(1); // Reset current page when search term changes
     };
 
     // Logic for pagination
@@ -78,7 +79,6 @@ const MemberTable = () => {
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
-
 
     // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);

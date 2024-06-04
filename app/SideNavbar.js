@@ -80,41 +80,7 @@ const SideNavbar = ({ isAdmin = true }) => {
           </div>
         </>
       )}
-      <div className="flex-1"></div>
-      <div className='w-full px-8'>
-        <Button
-          startIcon={<SettingsIcon />}
-          onClick={() => router.push('/settings')}
-          className="mb-2 pr-20 hover:shadow-lg"
-          sx={{
-            color: 'grey',
-            justifyContent: 'start',
-            '&:hover': {
-              backgroundColor: '#B22824',
-              color: 'white',
-            },
-          }}
-        >
-          Settings
-        </Button>
-      </div>
-      <div className='w-full px-8'>
-        <Button
-          startIcon={<LogoutIcon />}
-          onClick={() => router.push('/logout')}
-          className="mb-4 pr-24 hover:shadow-lg"
-          sx={{
-            color: 'grey',
-            justifyContent: 'start',
-            '&:hover': {
-              backgroundColor: '#B22824',
-              color: 'white',
-            },
-          }}
-        >
-          Logout
-        </Button>
-      </div>
+      
     </div>
   );
 };
