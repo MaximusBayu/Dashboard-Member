@@ -4,17 +4,17 @@ import React, { Component } from 'react';
 import Carousel from 'react-material-ui-carousel';
 import { Paper } from '@mui/material';
 
-const COLORS = ['#F44336', '#4CAF50', '#2196F3', '#FFEB3B'];
+const COLORS = ['#8BC34A', '#F44336', '#2196F3', '#FFEB3B'];
 
-class Example extends Component {
+class InfoMember extends Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [
-                { name: 'Sistem Informasi', value: 30 },
-                { name: 'Teknik Industri', value: 25 },
+                { name: 'Teknik Industri', value: 27 },
+                { name: 'Sistem Informasi', value: 36 },
                 { name: 'Teknik Elektro', value: 20 },
-                { name: 'Informatika', value: 25 },
+                { name: 'Informatika', value: 17 },
             ],
         };
     }
@@ -36,7 +36,7 @@ class Item extends Component {
     drawPieChart = () => {
         const canvas = this.refs.canvas;
         const ctx = canvas.getContext('2d');
-        const radius = canvas.height / 2 - 20;
+        const radius = canvas.height / 3 - 10;
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
 
@@ -60,19 +60,21 @@ class Item extends Component {
 
     render() {
         return (
-            <Paper>
-                <h2>Program Studi Member</h2>
-                <canvas ref="canvas" width={400} height={400} />
-                <ul>
+            <Paper style={{ textAlign: 'center', padding: '10px', margin: 'auto', width: '250px' }}>
+                <h2 style={{ fontSize: '14px' }}>Program Studi Member</h2>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <canvas ref="canvas" width={150} height={150} />
+                </div>
+                <ul style={{ display: 'flex', justifyContent: 'center', listStyleType: 'none', padding: 0, fontSize: '10px' }}>
                     {this.props.data.map((data, index) => (
-                        <li key={index}>
+                        <li key={index} style={{ margin: '0 5px' }}>
                             <span
                                 style={{
                                     display: 'inline-block',
-                                    width: '10px',
-                                    height: '10px',
+                                    width: '8px',
+                                    height: '8px',
                                     backgroundColor: this.props.colors[index],
-                                    marginRight: '5px',
+                                    marginRight: '3px',
                                 }}
                             ></span>
                             {data.name}
@@ -84,4 +86,4 @@ class Item extends Component {
     }
 }
 
-export default Example;
+export default InfoMember;
