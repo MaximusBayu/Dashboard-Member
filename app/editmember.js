@@ -19,6 +19,8 @@ const MemberPage = () => {
     photo: null,
   });
 
+  const [educationHistory, setEducationHistory] = useState([]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setMemberData({ ...memberData, [name]: value });
@@ -29,12 +31,19 @@ const MemberPage = () => {
   };
 
   const handleAddEducation = () => {
-    console.log('Education Data Submitted:', educationData);
+    const newEducation = {
+      level: memberData.educationHistory,
+      university: memberData.university,
+    };
 
-    setEducationData({
+    setEducationHistory([...educationHistory, newEducation]);
+    setMemberData({
+      ...memberData,
       educationHistory: '',
-      university: ''
+      university: '',
     });
+
+    console.log("Riwayat pendidikan tersimpan");
   };
 
   const handleSubmit = async (e) => {
@@ -149,30 +158,40 @@ const MemberPage = () => {
           </div>
           <div className="mb-5">
             <label className="block font-bold mb-2">Riwayat Pendidikan</label>
-            <div className="flex items-center w-full">
-            <select
-              name="educationHistory"
-              value={memberData.educationHistory}
-              onChange={handleInputChange}
-              className="w-full p-2 text-lg border mr-2 border-none"
-            >
-              <option value="">Pilih Pendidikan</option>
-              <option value="S1">S1</option>
-              <option value="S2">S2</option>
-              <option value="S3">S3</option>
-            </select>
-              <input
-                type="text"
-                name="university"
-                value={memberData.university}
-                onChange={handleInputChange}
-                className="w-full p-2 text-lg border mr-2 border-none"
-                placeholder="Tulis Universitas"
-              />
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded ml-2"
-                onClick={handleAddEducation}
-              > + </button>
+            <div className="grid grid-cols-4 gap-40">
+              <div className='w-40'>
+                <label className="block mb-1">Pendidikan Terakhir</label>
+                <select
+                  name="educationHistory"
+                  value={memberData.educationHistory}
+                  onChange={handleInputChange}
+                  className="w-full p-2 text-lg border border-none"
+                >
+                  <option value="">Pilih Pendidikan</option>
+                  <option value="S1">S1</option>
+                  <option value="S2">S2</option>
+                  <option value="S3">S3</option>
+                </select>
+              </div>
+              <div className="w-72 col-span-2">
+                <label className="block mb-1">Universitas</label>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    name="university"
+                    value={memberData.university}
+                    onChange={handleInputChange}
+                    className="w-full p-2 text-lg border border-none"
+                    placeholder="Tulis Universitas"
+                  />
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded mr-5 hover:bg-blue-900"
+                    onClick={handleAddEducation}
+                  >
+                    +
+                </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -275,7 +294,13 @@ const MemberPage = () => {
       <div className="flex justify-end">
           <div className="flex items-center space-x-2">
             <button type="button" className="text-blue-500 cursor-pointer">Edit</button>
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Simpan</button>
+            <button 
+            type="submit" 
+            className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer"
+            onClick={handleSubmit}
+            >
+              Simpan
+            </button>
           </div>
       </div>
     </div>
