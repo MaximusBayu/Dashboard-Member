@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
@@ -8,6 +8,8 @@ import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRound
 import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MemberDialog from './MemberDialog';
+import ReactToPrint from 'react-to-print';
+import PrintMember from './PrintMember';
 
 const members = [
     { id: 1, name: 'John Doe', NIP: '123456', programStudi: 'Informatika', status: 'aktif' },
@@ -44,6 +46,7 @@ const MemberTable = () => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const componentRef = useRef();
 
     const handleStatusFilterChange = (event) => {
         setStatusFilter(event.target.value);
@@ -90,6 +93,13 @@ const MemberTable = () => {
     const handleConfirmationPrint = () => {
         console.log('Printed');
         setConfirmationOpen(false);
+        handlePrint();
+    };
+
+    const handlePrint = () => {
+        if (componentRef.current) {
+            componentRef.current.handlePrint();
+        }
     };
 
     const startRange = (currentPage - 1) * itemsPerPage + 1;
@@ -149,7 +159,6 @@ const MemberTable = () => {
     return (
         <div className="container mx-auto my-8">
             <div className="bg-gray-200 p-4 rounded-lg shadow-lg overflow-hidden">
-
                 <div className="flex justify-between mb-4 text-gray-500 items-center">
                     <div className="flex items-center">
                         <div className="flex items-center justify-start">
@@ -234,7 +243,7 @@ const MemberTable = () => {
                     </div>
                 </div>
 
-                <table className="w-full table-auto border-collapse rounded">
+                <table ref={componentRef} className="w-full table-auto border-collapse rounded">
                     <thead className="bg-red-700">
                         <tr>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
@@ -300,6 +309,14 @@ const MemberTable = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ReactToPrint
+                trigger={() => (
+                    <div style={{ display: 'none' }}>
+                        <PrintMember ref={componentRef} />
+                    </div>
+                )}
+                content={() => componentRef}
+            />
         </div>
     );
 };
