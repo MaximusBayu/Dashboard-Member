@@ -91,7 +91,10 @@ const MemberPage = () => {
       <div className="flex">
         <div className="w-1/2">
           <div className="mb-5">
-            <label className="block font-bold mb-2">Nama</label>
+            <div className='flex flex-row'>
+              <label className="block font-bold mb-2">Nama</label>
+              <label className="text-red-500">*</label>
+            </div>
             <input
               type="text"
               name="name"
@@ -102,7 +105,10 @@ const MemberPage = () => {
             />
           </div>
           <div className="mb-5">
-            <label className="block font-bold mb-2">NIP</label>
+            <div className='flex flex-row'>
+                <label className="block font-bold mb-2">NIP</label>
+                <label className="text-red-500">*</label>
+              </div>
             <input
               type="text"
               name="nip"
@@ -185,7 +191,7 @@ const MemberPage = () => {
                     placeholder="Tulis Universitas"
                   />
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded mr-5 hover:bg-blue-900"
+                    className="bg-blue-500 text-white px-4 py-2 rounded ml-5 hover:bg-blue-900"
                     onClick={handleAddEducation}
                   >
                     +
