@@ -1,35 +1,38 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import MemberDialog from './MemberDialog';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import MemberDialog from './MemberDialog';
 
 const members = [
-    { id: 1, name: 'John Doe', NIP: '123456', programStudi: 'Computer Science' },
-    { id: 2, name: 'Jane Smith', NIP: '234567', programStudi: 'Mathematics' },
-    { id: 3, name: 'Alice Johnson', NIP: '345678', programStudi: 'Physics' },
-    { id: 4, name: 'Bob Brown', NIP: '456789', programStudi: 'Chemistry' },
-    { id: 5, name: 'Emily Davis', NIP: '567890', programStudi: 'Biology' },
-    { id: 6, name: 'Michael Wilson', NIP: '678901', programStudi: 'Engineering' },
-    { id: 7, name: 'Olivia Martinez', NIP: '789012', programStudi: 'Medicine' },
-    { id: 8, name: 'James Anderson', NIP: '890123', programStudi: 'History' },
-    { id: 9, name: 'Sophia Taylor', NIP: '901234', programStudi: 'Geography' },
-    { id: 10, name: 'Daniel Thomas', NIP: '012345', programStudi: 'Literature' },
-    { id: 11, name: 'Emma Jackson', NIP: '123456', programStudi: 'Psychology' },
-    { id: 12, name: 'William White', NIP: '234567', programStudi: 'Sociology' },
-    { id: 13, name: 'Ava Harris', NIP: '345678', programStudi: 'Economics' },
-    { id: 14, name: 'Alexander Martin', NIP: '456789', programStudi: 'Political Science' },
-    { id: 15, name: 'Mia Thompson', NIP: '567890', programStudi: 'Anthropology' },
-    { id: 16, name: 'Ethan Garcia', NIP: '678901', programStudi: 'Music' },
-    { id: 17, name: 'Charlotte Rodriguez', NIP: '789012', programStudi: 'Dance' },
-    { id: 18, name: 'Benjamin Martinez', NIP: '890123', programStudi: 'Art' },
-    { id: 19, name: 'Madison Lopez', NIP: '901234', programStudi: 'Film Studies' },
-    { id: 20, name: 'Jacob Lee', NIP: '012345', programStudi: 'Theater' },
+    { id: 1, name: 'John Doe', NIP: '123456', programStudi: 'Informatika', status: 'aktif' },
+    { id: 2, name: 'Jane Smith', NIP: '234567', programStudi: 'Rekayasa Perangkat Lunak', status: 'tidak aktif' },
+    { id: 3, name: 'Alice Johnson', NIP: '345678', programStudi: 'Sistem Informasi', status: 'aktif' },
+    { id: 4, name: 'Bob Brown', NIP: '456789', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
+    { id: 5, name: 'Emily Davis', NIP: '567890', programStudi: 'Informatika', status: 'tidak aktif' },
+    { id: 6, name: 'Michael Wilson', NIP: '678901', programStudi: 'Sistem Informasi', status: 'aktif' },
+    { id: 7, name: 'Olivia Martinez', NIP: '789012', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
+    { id: 8, name: 'James Anderson', NIP: '890123', programStudi: 'Informatika', status: 'aktif' },
+    { id: 9, name: 'Sophia Taylor', NIP: '901234', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
+    { id: 10, name: 'Daniel Thomas', NIP: '012345', programStudi: 'Informatika', status: 'aktif' },
+    { id: 11, name: 'Emma Jackson', NIP: '123456', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
+    { id: 12, name: 'William White', NIP: '234567', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
+    { id: 13, name: 'Ava Harris', NIP: '345678', programStudi: 'Informatika', status: 'aktif' },
+    { id: 14, name: 'Alexander Martin', NIP: '456789', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
+    { id: 15, name: 'Mia Thompson', NIP: '567890', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
+    { id: 16, name: 'Ethan Garcia', NIP: '678901', programStudi: 'Sistem Informasi', status: 'aktif' },
+    { id: 17, name: 'Charlotte Rodriguez', NIP: '789012', programStudi: 'Informatika', status: 'tidak aktif' },
+    { id: 18, name: 'Benjamin Martinez', NIP: '890123', programStudi: 'Rekayasa Perangkat Lunak', status: 'tidak aktif' },
+    { id: 19, name: 'Madison Lopez', NIP: '901234', programStudi: 'Sistem Informasi', status: 'aktif' },
+    { id: 20, name: 'Jacob Lee', NIP: '012345', programStudi: 'Informatika', status: 'aktif' },
 ];
+
+
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
@@ -37,24 +40,46 @@ const MemberTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
-    const [printOpen, setPrintOpen] = useState(false);
-    const [printFilter, setPrintFilter] = useState('');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
+    const [filterOpen, setFilterOpen] = useState(false);
+    const [selectedFilter, setSelectedFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('');
+
+    const handleStatusFilterChange = (event) => {
+        setStatusFilter(event.target.value);
+    };
+
+    const handleFilterOpen = () => {
+        setFilterOpen(true);
+    };
+
+    const handleFilterClose = () => {
+        setFilterOpen(false);
+    };
+
+    const handleFilterChange = (event) => {
+        setSelectedFilter(event.target.value);
+    };
+
+    const handleClickOutsideFilter = (event) => {
+        const filterDropdown = document.getElementById('filter-dropdown');
+        if (filterDropdown && !filterDropdown.contains(event.target)) {
+            handleFilterClose();
+        }
+    };
+
+    useEffect(() => {
+        if (filterOpen) {
+            document.addEventListener('click', handleClickOutsideFilter);
+        } else {
+            document.removeEventListener('click', handleClickOutsideFilter);
+        }
+        return () => {
+            document.removeEventListener('click', handleClickOutsideFilter);
+        };
+    }, [filterOpen]);
 
     const handlePrintOpen = () => {
-        setPrintOpen(true);
-    };
-
-    const handlePrintClose = () => {
-        setPrintOpen(false);
-    };
-
-    const handlePrintFilterChange = (event) => {
-        setPrintFilter(event.target.value);
-    };
-
-    const handlePrint = () => {
-        setPrintOpen(false);
         setConfirmationOpen(true);
     };
 
@@ -63,8 +88,7 @@ const MemberTable = () => {
     };
 
     const handleConfirmationPrint = () => {
-        console.log('Printed with filter:', printFilter);
-        setPrintFilter(''); 
+        console.log('Printed');
         setConfirmationOpen(false);
     };
 
@@ -84,22 +108,32 @@ const MemberTable = () => {
         setSelectedMember(null);
     };
 
-    // Function to handle dropdown change
     const handleItemsPerPageChange = (event) => {
         setItemsPerPage(parseInt(event.target.value));
-        setCurrentPage(1); // Reset current page when items per page changes
+        setCurrentPage(1);
     };
 
-    // Function to handle search input change
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
-        setCurrentPage(1); // Reset current page when search term changes
+        setCurrentPage(1);
     };
 
-    // Logic for pagination
+    const filteredMembers = members.filter((member) => {
+        if (selectedFilter) {
+            return member.programStudi === selectedFilter;
+        }
+        return true;
+    });
+
+    const sortedMembers = statusFilter === 'aktif' ?
+        filteredMembers.filter(member => member.status === 'aktif') :
+        statusFilter === 'tidak-aktif' ?
+            filteredMembers.filter(member => member.status === 'tidak aktif') :
+            filteredMembers;
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentMembers = members
+    const currentMembers = sortedMembers
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
@@ -110,28 +144,79 @@ const MemberTable = () => {
         })
         .slice(indexOfFirstItem, indexOfLastItem);
 
-    // Change page
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
         <div className="container mx-auto my-8">
             <div className="bg-gray-200 p-4 rounded-lg shadow-lg overflow-hidden">
 
-                {/* Dropdown and search */}
                 <div className="flex justify-between mb-4 text-gray-500 items-center">
                     <div className="flex items-center">
-                        <span className="text-sm mr-2">Show</span>
-                        <div className="flex items-center">
-                            <select
-                                value={itemsPerPage}
-                                onChange={handleItemsPerPageChange}
-                                className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
+                        <div className="flex items-center justify-start">
+                            <span className="text-sm mr-2">Show</span>
+                            <div className="flex items-center mr-4">
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={handleItemsPerPageChange}
+                                    className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
+                                >
+                                    {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
+                                        <option key={option} value={option}>{option}</option>
+                                    ))}
+                                </select>
+                                <span className="text-sm">Data</span>
+                            </div>
+                            <button
+                                className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md flex items-center"
+                                onClick={handleFilterOpen}
                             >
-                                {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
-                                    <option key={option} value={option}>{option}</option>
-                                ))}
-                            </select>
-                            <span className="text-sm">Data</span>
+                                <FilterListIcon />
+                                <span className="ml-2">Filters</span>
+                            </button>
+                            {filterOpen && (
+                                <div id="filter-dropdown" className="absolute top-36 mt-2 ml-36 w-64 bg-white border border-gray-300 rounded-md shadow-lg p-4 z-10">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="text-sm font-semibold">Filters</h3>
+                                        <button className="text-sm text-gray-600" onClick={handleFilterClose}>Close</button>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Jurusan</label>
+                                        <select
+                                            id="filter-select"
+                                            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
+                                            value={selectedFilter}
+                                            onChange={handleFilterChange}
+                                        >
+                                            <option value="" >All</option>
+                                            <option value="Informatika">Informatika</option>
+                                            <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
+                                            <option value="Sistem Informasi">Sistem Informasi</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-4">
+                                        <span className="block text-sm font-semibold mb-1">Status</span>
+                                        <div>
+                                            <input
+                                                type="checkbox"
+                                                id="aktif"
+                                                checked={statusFilter === 'aktif'}
+                                                onChange={() => setStatusFilter(statusFilter === 'aktif' ? '' : 'aktif')}
+                                            />
+                                            <label htmlFor="aktif" className="ml-2">Aktif</label>
+                                        </div>
+                                        <div>
+                                            <input
+                                                type="checkbox"
+                                                id="tidak-aktif"
+                                                checked={statusFilter === 'tidak-aktif'}
+                                                onChange={() => setStatusFilter(statusFilter === 'tidak-aktif' ? '' : 'tidak-aktif')}
+                                            />
+                                            <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className="flex items-center">
@@ -176,7 +261,6 @@ const MemberTable = () => {
                     </tbody>
                 </table>
 
-                {/* Pagination */}
                 <div className="flex justify-end mt-4">
                     <div className="flex items-center">
                         <IconButton
@@ -202,37 +286,6 @@ const MemberTable = () => {
 
             <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
 
-            <Dialog open={printOpen} onClose={handlePrintClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Print Member</DialogTitle>
-                <DialogContent>
-                    <FormControl fullWidth className='my-2'>
-                        <InputLabel id="print-filter-label">Filter member by</InputLabel>
-                        <Select
-                            labelId="print-filter-label"
-                            id="print-filter"
-                            value={printFilter}
-                            onChange={handlePrintFilterChange}
-                            label="Filter member by"
-                        >
-                            <MenuItem value="All">All</MenuItem>
-                            <MenuItem value="jurusan">Jurusan</MenuItem>
-                            <MenuItem value="fakultas">Fakultas</MenuItem>
-                            <MenuItem value="aktif">Aktif</MenuItem>
-                            <MenuItem value="tidak aktif">Tidak Aktif</MenuItem>
-                        </Select>
-                    </FormControl>
-                </DialogContent>
-                <DialogActions className='p-4'>
-                    <Button onClick={handlePrintClose} variant='text'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handlePrint} variant='contained' autoFocus>
-                        Print
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Confirmation Dialog */}
             <Dialog open={confirmationOpen} onClose={handleConfirmationClose} maxWidth="sm" fullWidth>
                 <DialogTitle>Print Confirmation</DialogTitle>
                 <DialogContent>
