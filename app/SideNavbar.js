@@ -47,7 +47,7 @@ const SideNavbar = ({ isAdmin = true }) => {
           <div className='w-full px-8'>
             <Button
               startIcon={<PersonAddIcon />}
-              onClick={() => router.push('/add-member')}
+              onClick={() => router.push('/editmember')}
               className="mb-4 pr-7 text-sm text-nowrap hover:shadow-lg"
               sx={{
                 color: 'grey',
