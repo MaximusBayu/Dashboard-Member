@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
@@ -21,21 +21,23 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
-    const tableRef = useRef(); // New ref for the table
+    const [totalMembers, setTotalMembers] = useState(0);
+    const tableRef = useRef();
+
+    const fetchMembers = async (page, limit) => {
+        try {
+            const response = await fetch(`http://dummyjson.com/users?skip=${(page - 1) * limit}&limit=${limit}`);
+            const data = await response.json();
+            setMembers(data.users);
+            setTotalMembers(data.total);
+        } catch (error) {
+            console.error('Error fetching members:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await fetch('http://localhost:5000/member/get');
-                const data = await response.json();
-                setMembers(data.response);
-            } catch (error) {
-                console.error('Error fetching members:', error);
-            }
-        };
-
-        fetchMembers();
-    }, []);
+        fetchMembers(currentPage, itemsPerPage);
+    }, [currentPage, itemsPerPage]);
 
     const handleStatusFilterChange = (event) => {
         setStatusFilter(event.target.value);
@@ -91,15 +93,9 @@ const MemberTable = () => {
         }
     };
 
-    const startRange = (currentPage - 1) * itemsPerPage + 1;
-    let endRange = currentPage * itemsPerPage;
-    if (endRange > members.length) {
-        endRange = members.length;
-    }
-
     const handleOpen = async (member) => {
         try {
-            const response = await fetch(`http://localhost:5000/member/get/${member.id}`);
+            const response = await fetch(`http://dummyjson.com/users/${member.id}`);
             const data = await response.json();
             setSelectedMember(data);
             setOpen(true);
@@ -125,7 +121,7 @@ const MemberTable = () => {
 
     const filteredMembers = members.filter((member) => {
         if (selectedFilter) {
-            return member.programStudi === selectedFilter;
+            return member.company.department === selectedFilter;
         }
         return true;
     });
@@ -136,23 +132,29 @@ const MemberTable = () => {
             filteredMembers.filter(member => member.status === 'tidak aktif') :
             filteredMembers;
 
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentMembers = sortedMembers
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.NIP.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.programStudi.toLowerCase().includes(searchTerm.toLowerCase())
+                member.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                member.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                member.email.toLowerCase().includes(searchTerm.toLowerCase())
             );
-        })
-        .slice(indexOfFirstItem, indexOfLastItem);
+        });
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const paginate = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        fetchMembers(pageNumber, itemsPerPage);
+    };
+
+    const startRange = (currentPage - 1) * itemsPerPage + 1;
+    let endRange = currentPage * itemsPerPage;
+    if (endRange > totalMembers) {
+        endRange = totalMembers;
+    }
 
     return (
-        <div className="container mx-auto my-8">
+        <div className="container mx-auto my-8 max-w-screen-lg overflow-x-auto">
             <div className="bg-gray-200 p-4 rounded-lg shadow-lg overflow-hidden">
                 <div className="flex justify-between mb-4 text-gray-500 items-center">
                     <div className="flex items-center">
@@ -164,10 +166,13 @@ const MemberTable = () => {
                                     onChange={handleItemsPerPageChange}
                                     className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                                 >
-                                    {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
-                                        <option key={option} value={option}>{option}</option>
+                                    {[totalMembers, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
+                                        <option key={option} value={option}>
+                                            {option === totalMembers ? "All" : option}
+                                        </option>
                                     ))}
                                 </select>
+
                                 <span className="text-sm">Data</span>
                             </div>
                             <button
@@ -192,9 +197,9 @@ const MemberTable = () => {
                                             onChange={handleFilterChange}
                                         >
                                             <option value="" >All</option>
-                                            <option value="Informatika">Informatika</option>
-                                            <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
-                                            <option value="Sistem Informasi">Sistem Informasi</option>
+                                            <option value="Support">Support</option>
+                                            <option value="Marketing">Marketing</option>
+                                            <option value="Engineering">Engineering</option>
                                         </select>
                                     </div>
                                     <div className="mb-4">
@@ -218,7 +223,6 @@ const MemberTable = () => {
                                             <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
                                         </div>
                                     </div>
-
                                 </div>
                             )}
                         </div>
@@ -242,35 +246,36 @@ const MemberTable = () => {
                         />
                     </div>
                 </div>
-
-                <table ref={tableRef} className="w-full table-auto border-collapse rounded">
-                    <thead className="bg-red-700">
-                        <tr>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
-                            <th className="px-4 py-2 text-left text-xs font-bold text-white uppercase border-r border-gray-300">Name</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">NIP</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Program Studi</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Fakultas</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase">Lihat</th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {currentMembers.map((member, index) => (
-                            <tr key={member.id}>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{indexOfFirstItem + index + 1}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.nama}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.nip}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.fakultas}</td>
-                                <td className="px-4 py-2 whitespace-nowrap flex justify-center">
-                                    <IconButton onClick={() => handleOpen(member)}>
-                                        <VisibilityIcon style={{ color: '#1677BD' }} />
-                                    </IconButton>
-                                </td>
+                <div>
+                    <table ref={tableRef} className="w-full table-auto border-collapse rounded">
+                        <thead className="bg-red-700">
+                            <tr>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
+                                <th className="px-4 py-2 text-left text-xs font-bold text-white uppercase border-r border-gray-300">Name</th>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">NIP</th>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Program Studi</th>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Fakultas</th>
+                                <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase">Lihat</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {currentMembers.map((member, index) => (
+                                <tr key={member.id}>
+                                    <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{startRange + index}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.firstName} {member.lastName}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.username}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.email}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.company.department}</td>
+                                    <td className="px-4 py-2 whitespace-nowrap flex justify-center">
+                                        <IconButton onClick={() => handleOpen(member)}>
+                                            <VisibilityIcon style={{ color: '#1677BD' }} />
+                                        </IconButton>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
                 <div className="flex justify-end mt-4">
                     <div className="flex items-center">
@@ -282,11 +287,11 @@ const MemberTable = () => {
                             <ArrowBackIosRoundedIcon />
                         </IconButton>
                         <span className="text-sm text-gray-600">
-                            {`Show ${startRange} to ${endRange} from ${members.length} data`}
+                            {`Show ${startRange} to ${endRange} from ${totalMembers} data`}
                         </span>
                         <IconButton
                             onClick={() => paginate(currentPage + 1)}
-                            disabled={currentMembers.length < itemsPerPage}
+                            disabled={currentPage === Math.ceil(totalMembers / itemsPerPage)}
                             color="primary"
                         >
                             <ArrowForwardIosRoundedIcon />
