@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
@@ -9,7 +9,6 @@ import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MemberDialog from './MemberDialog';
 import ReactToPrint from 'react-to-print';
-import PrintMember from './PrintMember';
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
@@ -22,7 +21,7 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
-    const componentRef = useRef();
+    const tableRef = useRef(); // New ref for the table
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -87,8 +86,8 @@ const MemberTable = () => {
     };
 
     const handlePrint = () => {
-        if (componentRef.current) {
-            componentRef.current.handlePrint();
+        if (tableRef.current) {
+            tableRef.current.handlePrint();
         }
     };
 
@@ -232,20 +231,26 @@ const MemberTable = () => {
                             onChange={handleSearchChange}
                             className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                         />
-                        <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center" onClick={handlePrintOpen}>
-                            <PrintIcon />
-                            <span className="ml-2">Print Data Member</span>
-                        </button>
+                        <ReactToPrint
+                            trigger={() => (
+                                <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center">
+                                    <PrintIcon />
+                                    <span className="ml-2">Print Data Member</span>
+                                </button>
+                            )}
+                            content={() => tableRef.current}
+                        />
                     </div>
                 </div>
 
-                <table ref={componentRef} className="w-full table-auto border-collapse rounded">
+                <table ref={tableRef} className="w-full table-auto border-collapse rounded">
                     <thead className="bg-red-700">
                         <tr>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
                             <th className="px-4 py-2 text-left text-xs font-bold text-white uppercase border-r border-gray-300">Name</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">NIP</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Program Studi</th>
+                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Fakultas</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase">Lihat</th>
                         </tr>
                     </thead>
@@ -256,6 +261,7 @@ const MemberTable = () => {
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.nama}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.nip}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.fakultas}</td>
                                 <td className="px-4 py-2 whitespace-nowrap flex justify-center">
                                     <IconButton onClick={() => handleOpen(member)}>
                                         <VisibilityIcon style={{ color: '#1677BD' }} />
@@ -305,14 +311,6 @@ const MemberTable = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            <ReactToPrint
-                trigger={() => (
-                    <div style={{ display: 'none' }}>
-                        <PrintMember ref={componentRef} />
-                    </div>
-                )}
-                content={() => componentRef}
-            />
         </div>
     );
 };
