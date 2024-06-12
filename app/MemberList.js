@@ -114,9 +114,11 @@ const MemberTable = () => {
     };
 
     const handleItemsPerPageChange = (event) => {
-        setItemsPerPage(parseInt(event.target.value));
+        const value = event.target.value;
+        setItemsPerPage(value === "all" ? members.length : parseInt(value));
         setCurrentPage(1);
     };
+
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -125,7 +127,7 @@ const MemberTable = () => {
 
     const filteredMembers = members.filter((member) => {
         if (selectedFilter) {
-            return member.programStudi === selectedFilter;
+            return member.fakultas === selectedFilter;
         }
         return true;
     });
@@ -142,9 +144,9 @@ const MemberTable = () => {
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.NIP.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.programStudi.toLowerCase().includes(searchTerm.toLowerCase())
+                member.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                String(member.nip).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                member.program_studi.toLowerCase().includes(searchTerm.toLowerCase())
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
@@ -152,7 +154,7 @@ const MemberTable = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <div className="container mx-auto my-8">
+        <div className="container mx-auto my-8 max-w-screen-lg overflow-x-auto">
             <div className="bg-gray-200 p-4 rounded-lg shadow-lg overflow-hidden">
                 <div className="flex justify-between mb-4 text-gray-500 items-center">
                     <div className="flex items-center">
@@ -160,14 +162,16 @@ const MemberTable = () => {
                             <span className="text-sm mr-2">Show</span>
                             <div className="flex items-center mr-4">
                                 <select
-                                    value={itemsPerPage}
+                                    value={itemsPerPage === members.length ? "all" : itemsPerPage}
                                     onChange={handleItemsPerPageChange}
                                     className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                                 >
+                                    <option value="all">All</option>
                                     {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </select>
+
                                 <span className="text-sm">Data</span>
                             </div>
                             <button
@@ -184,7 +188,7 @@ const MemberTable = () => {
                                         <button className="text-sm text-gray-600" onClick={handleFilterClose}>Close</button>
                                     </div>
                                     <div className="mb-4">
-                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Jurusan</label>
+                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Fakultas</label>
                                         <select
                                             id="filter-select"
                                             className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
@@ -193,8 +197,8 @@ const MemberTable = () => {
                                         >
                                             <option value="" >All</option>
                                             <option value="Informatika">Informatika</option>
-                                            <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
-                                            <option value="Sistem Informasi">Sistem Informasi</option>
+                                            <option value="Rekayasa Industri">Rekayasa Industri</option>
+                                            <option value="Teknik Elektro">Teknik Elektro</option>
                                         </select>
                                     </div>
                                     <div className="mb-4">
@@ -211,9 +215,9 @@ const MemberTable = () => {
                                         <div>
                                             <input
                                                 type="checkbox"
-                                                id="tidak-aktif"
-                                                checked={statusFilter === 'tidak-aktif'}
-                                                onChange={() => setStatusFilter(statusFilter === 'tidak-aktif' ? '' : 'tidak-aktif')}
+                                                id="tidak aktif"
+                                                checked={statusFilter === 'tidak aktif'}
+                                                onChange={() => setStatusFilter(statusFilter === 'tidak aktif' ? '' : 'tidak aktif')}
                                             />
                                             <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
                                         </div>
@@ -297,20 +301,6 @@ const MemberTable = () => {
 
             <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
 
-            <Dialog open={confirmationOpen} onClose={handleConfirmationClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Print Confirmation</DialogTitle>
-                <DialogContent>
-                    <p>Apakah anda yakin ingin melakukan print pada semua member ini?</p>
-                </DialogContent>
-                <DialogActions className='p-4'>
-                    <Button onClick={handleConfirmationClose} variant='text'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleConfirmationPrint} variant='contained' autoFocus>
-                        Print
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </div>
     );
 };
