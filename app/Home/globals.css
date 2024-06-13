@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.humic-red{
+    color: #B22824;
+    background-color: #B22824;
+}
+
+.humic-grey{
+    color: #959499;
+}
+
+.humic-blue{
+    color: #1677BD;
+}

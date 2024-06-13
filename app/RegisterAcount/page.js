@@ -1,10 +1,10 @@
+import RegMember from '../Home/registerMember';
 
-import Login from './login';
 
 export default function Home() {
   return (
     <div>
-      <Login/>
+      <RegMember/>
     </div>
   );
 }

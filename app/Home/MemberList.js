@@ -7,9 +7,9 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MemberDialog from './MemberDialog';
+import MemberDialog from '../Home/MemberDialog';
 import ReactToPrint from 'react-to-print';
-import PrintMember from './PrintMember';
+import PrintMember from '../Home/PrintMember';
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
