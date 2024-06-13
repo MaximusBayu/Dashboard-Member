@@ -60,7 +60,7 @@ class Item extends Component {
 
     render() {
         return (
-            <Paper style={{ textAlign: 'center', padding: '10px', margin: 'auto', width: '250px' }}>
+            <div style={{ textAlign: 'center', padding: '10px', margin: 'auto', width: '250px' }}>
                 <h2 style={{ fontSize: '14px' }}>Program Studi Member</h2>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <canvas ref="canvas" width={150} height={150} />
@@ -81,7 +81,7 @@ class Item extends Component {
                         </li>
                     ))}
                 </ul>
-            </Paper>
+            </div>
         );
     }
 }
