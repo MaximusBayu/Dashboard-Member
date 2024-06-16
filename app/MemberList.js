@@ -21,16 +21,22 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
-    const tableRef = useRef(); // New ref for the table
+    const tableRef = useRef(); 
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
                 const response = await fetch('http://localhost:5000/member/get');
                 const data = await response.json();
-                setMembers(data.response);
+                // Ensure that data.response is an array
+                if (Array.isArray(data.response)) {
+                    setMembers(data.response);
+                } else {
+                    setMembers([]);
+                }
             } catch (error) {
                 console.error('Error fetching members:', error);
+                setMembers([]);
             }
         };
 
