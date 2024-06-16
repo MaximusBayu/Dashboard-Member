@@ -14,3 +14,12 @@
 .humic-blue{
     color: #1677BD;
 }
+
+.table-auto {
+    font-size: 0.875rem;
+}
+
+.table-auto th,
+.table-auto td {
+    padding: 0.5rem;
+}

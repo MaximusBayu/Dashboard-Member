@@ -14,9 +14,9 @@ const MemberDialog = ({ open, onClose, member }) => {
         </Typography>
         {member && (
           <div className="mt-4">
-            <Typography>Name: {member.name}</Typography>
-            <Typography>NIP: {member.NIP}</Typography>
-            <Typography>Program Studi: {member.programStudi}</Typography>
+            <Typography>Name: {member.nama}</Typography>
+            <Typography>NIP: {member.nip}</Typography>
+            <Typography>Program Studi: {member.program_studi}</Typography>
           </div>
         )}
       </Box>

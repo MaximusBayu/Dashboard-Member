@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react';
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
@@ -9,7 +9,6 @@ import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MemberDialog from './MemberDialog';
 import ReactToPrint from 'react-to-print';
-import PrintMember from './PrintMember';
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
@@ -22,16 +21,22 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
-    const componentRef = useRef();
+    const tableRef = useRef(); 
 
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/member/get');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get`);
                 const data = await response.json();
-                setMembers(data.response);
+                // Ensure that data.response is an array
+                if (Array.isArray(data.response)) {
+                    setMembers(data.response);
+                } else {
+                    setMembers([]);
+                }
             } catch (error) {
                 console.error('Error fetching members:', error);
+                setMembers([]);
             }
         };
 
@@ -87,8 +92,8 @@ const MemberTable = () => {
     };
 
     const handlePrint = () => {
-        if (componentRef.current) {
-            componentRef.current.handlePrint();
+        if (tableRef.current) {
+            tableRef.current.handlePrint();
         }
     };
 
@@ -100,7 +105,7 @@ const MemberTable = () => {
 
     const handleOpen = async (member) => {
         try {
-            const response = await fetch(`http://localhost:5000/member/get/${member.id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${member.id}`);
             const data = await response.json();
             setSelectedMember(data);
             setOpen(true);
@@ -115,9 +120,11 @@ const MemberTable = () => {
     };
 
     const handleItemsPerPageChange = (event) => {
-        setItemsPerPage(parseInt(event.target.value));
+        const value = event.target.value;
+        setItemsPerPage(value === "all" ? members.length : parseInt(value));
         setCurrentPage(1);
     };
+
 
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -126,7 +133,7 @@ const MemberTable = () => {
 
     const filteredMembers = members.filter((member) => {
         if (selectedFilter) {
-            return member.programStudi === selectedFilter;
+            return member.fakultas === selectedFilter;
         }
         return true;
     });
@@ -143,9 +150,9 @@ const MemberTable = () => {
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.NIP.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.programStudi.toLowerCase().includes(searchTerm.toLowerCase())
+                member.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                String(member.nip).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                member.program_studi.toLowerCase().includes(searchTerm.toLowerCase())
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
@@ -153,7 +160,7 @@ const MemberTable = () => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     return (
-        <div className="container mx-auto my-8">
+        <div className="container mx-auto my-8 max-w-screen-lg overflow-x-auto">
             <div className="bg-gray-200 p-4 rounded-lg shadow-lg overflow-hidden">
                 <div className="flex justify-between mb-4 text-gray-500 items-center">
                     <div className="flex items-center">
@@ -161,14 +168,16 @@ const MemberTable = () => {
                             <span className="text-sm mr-2">Show</span>
                             <div className="flex items-center mr-4">
                                 <select
-                                    value={itemsPerPage}
+                                    value={itemsPerPage === members.length ? "all" : itemsPerPage}
                                     onChange={handleItemsPerPageChange}
                                     className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                                 >
+                                    <option value="all">All</option>
                                     {[5, 10, 15, 20, 25, 30, 35, 40, 45, 50].map((option) => (
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </select>
+
                                 <span className="text-sm">Data</span>
                             </div>
                             <button
@@ -185,7 +194,7 @@ const MemberTable = () => {
                                         <button className="text-sm text-gray-600" onClick={handleFilterClose}>Close</button>
                                     </div>
                                     <div className="mb-4">
-                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Jurusan</label>
+                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Fakultas</label>
                                         <select
                                             id="filter-select"
                                             className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
@@ -194,8 +203,8 @@ const MemberTable = () => {
                                         >
                                             <option value="" >All</option>
                                             <option value="Informatika">Informatika</option>
-                                            <option value="Rekayasa Perangkat Lunak">Rekayasa Perangkat Lunak</option>
-                                            <option value="Sistem Informasi">Sistem Informasi</option>
+                                            <option value="Rekayasa Industri">Rekayasa Industri</option>
+                                            <option value="Teknik Elektro">Teknik Elektro</option>
                                         </select>
                                     </div>
                                     <div className="mb-4">
@@ -212,9 +221,9 @@ const MemberTable = () => {
                                         <div>
                                             <input
                                                 type="checkbox"
-                                                id="tidak-aktif"
-                                                checked={statusFilter === 'tidak-aktif'}
-                                                onChange={() => setStatusFilter(statusFilter === 'tidak-aktif' ? '' : 'tidak-aktif')}
+                                                id="tidak aktif"
+                                                checked={statusFilter === 'tidak aktif'}
+                                                onChange={() => setStatusFilter(statusFilter === 'tidak aktif' ? '' : 'tidak aktif')}
                                             />
                                             <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
                                         </div>
@@ -232,20 +241,26 @@ const MemberTable = () => {
                             onChange={handleSearchChange}
                             className="px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400 mr-2"
                         />
-                        <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center" onClick={handlePrintOpen}>
-                            <PrintIcon />
-                            <span className="ml-2">Print Data Member</span>
-                        </button>
+                        <ReactToPrint
+                            trigger={() => (
+                                <button className="bg-blue-500 text-white hover:bg-blue-700 px-4 py-2 rounded-md flex items-center">
+                                    <PrintIcon />
+                                    <span className="ml-2">Print Data Member</span>
+                                </button>
+                            )}
+                            content={() => tableRef.current}
+                        />
                     </div>
                 </div>
 
-                <table ref={componentRef} className="w-full table-auto border-collapse rounded">
+                <table ref={tableRef} className="w-full table-auto border-collapse rounded">
                     <thead className="bg-red-700">
                         <tr>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
                             <th className="px-4 py-2 text-left text-xs font-bold text-white uppercase border-r border-gray-300">Name</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">NIP</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Program Studi</th>
+                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Fakultas</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase">Lihat</th>
                         </tr>
                     </thead>
@@ -256,6 +271,7 @@ const MemberTable = () => {
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.nama}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.nip}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.fakultas}</td>
                                 <td className="px-4 py-2 whitespace-nowrap flex justify-center">
                                     <IconButton onClick={() => handleOpen(member)}>
                                         <VisibilityIcon style={{ color: '#1677BD' }} />
@@ -291,28 +307,6 @@ const MemberTable = () => {
 
             <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
 
-            <Dialog open={confirmationOpen} onClose={handleConfirmationClose} maxWidth="sm" fullWidth>
-                <DialogTitle>Print Confirmation</DialogTitle>
-                <DialogContent>
-                    <p>Apakah anda yakin ingin melakukan print pada semua member ini?</p>
-                </DialogContent>
-                <DialogActions className='p-4'>
-                    <Button onClick={handleConfirmationClose} variant='text'>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleConfirmationPrint} variant='contained' autoFocus>
-                        Print
-                    </Button>
-                </DialogActions>
-            </Dialog>
-            <ReactToPrint
-                trigger={() => (
-                    <div style={{ display: 'none' }}>
-                        <PrintMember ref={componentRef} />
-                    </div>
-                )}
-                content={() => componentRef}
-            />
         </div>
     );
 };
