@@ -64,7 +64,7 @@ const SideNavbar = ({ isAdmin = true }) => {
           <div className='w-full px-8'>
             <Button
               startIcon={<HistoryIcon />}
-              onClick={() => router.push('/history')}
+              onClick={() => router.push('/riwayatmasukkan')}
               className="mb-4 text-sm max-w-64 hover:shadow-lg"
               sx={{
                 color: 'grey',
