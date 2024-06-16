@@ -26,7 +26,7 @@ const MemberTable = () => {
     useEffect(() => {
         const fetchMembers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/member/get');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get`);
                 const data = await response.json();
                 // Ensure that data.response is an array
                 if (Array.isArray(data.response)) {
@@ -105,7 +105,7 @@ const MemberTable = () => {
 
     const handleOpen = async (member) => {
         try {
-            const response = await fetch(`http://localhost:5000/member/get/${member.id}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${member.id}`);
             const data = await response.json();
             setSelectedMember(data);
             setOpen(true);
