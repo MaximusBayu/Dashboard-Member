@@ -7,7 +7,7 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MemberDialog from '../MemberDialog';
+import MemberDialog from '../home/MemberDialog';
 import ReactToPrint from 'react-to-print';
 
 const MemberTable = () => {

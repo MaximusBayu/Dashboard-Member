@@ -1,11 +1,9 @@
-import MemberTable from './MemberList';
-import InfoMember from './karousel';
+import Login from './login';
 
 export default function Home() {
   return (
     <div>
-      <InfoMember/>
-      <MemberTable/>
+      <Login/>
     </div>
   );
 }

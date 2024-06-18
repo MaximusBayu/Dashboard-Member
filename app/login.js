@@ -1,4 +1,34 @@
-export default function Loginpage() {
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const res = await fetch("http://localhost:5000/auth/loginAdmin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      setMessage("Login successful!");
+      router.push("/dashboard");
+    } else {
+      setMessage(data.response);
+    }
+  };
+
   return (
     <main>
       <div className="flex justify-center self-center">
@@ -19,21 +49,28 @@ export default function Loginpage() {
             <p className="text-xl text-left font-light mb-1">
               Login as an admin user
             </p>
-            <form method="POST">
+            <form onSubmit={handleSubmit}>
               <input
                 type="text"
                 id="Username"
                 name="username"
                 placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
                 className="w-full rounded-md mt-3 py-3 px-3 border-gray-400 border text-black "
               />
               <input
-                type="text"
+                type="password"
                 id="Password"
                 name="Password"
                 placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
                 className="w-full rounded-md mt-3 border-gray-400 py-3 px-3 border text-black "
               />
+              <p>{message}</p>
               <input
                 type="submit"
                 className="w-full rounded-md mt-3 bg-blue-600 hover:bg-sky-700 py-3 text-white cursor-pointer"
@@ -45,4 +82,6 @@ export default function Loginpage() {
       </div>
     </main>
   );
-}
+};
+
+export default Login;
