@@ -7,34 +7,9 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MemberDialog from './MemberDialog';
+import MemberDialog from '../Home/MemberDialog';
 import ReactToPrint from 'react-to-print';
-import PrintMember from './PrintMember';
-
-const members = [
-    { id: 1, name: 'John Doe', NIP: '123456', programStudi: 'Informatika', status: 'aktif' },
-    { id: 2, name: 'Jane Smith', NIP: '234567', programStudi: 'Rekayasa Perangkat Lunak', status: 'tidak aktif' },
-    { id: 3, name: 'Alice Johnson', NIP: '345678', programStudi: 'Sistem Informasi', status: 'aktif' },
-    { id: 4, name: 'Bob Brown', NIP: '456789', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
-    { id: 5, name: 'Emily Davis', NIP: '567890', programStudi: 'Informatika', status: 'tidak aktif' },
-    { id: 6, name: 'Michael Wilson', NIP: '678901', programStudi: 'Sistem Informasi', status: 'aktif' },
-    { id: 7, name: 'Olivia Martinez', NIP: '789012', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
-    { id: 8, name: 'James Anderson', NIP: '890123', programStudi: 'Informatika', status: 'aktif' },
-    { id: 9, name: 'Sophia Taylor', NIP: '901234', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
-    { id: 10, name: 'Daniel Thomas', NIP: '012345', programStudi: 'Informatika', status: 'aktif' },
-    { id: 11, name: 'Emma Jackson', NIP: '123456', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
-    { id: 12, name: 'William White', NIP: '234567', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
-    { id: 13, name: 'Ava Harris', NIP: '345678', programStudi: 'Informatika', status: 'aktif' },
-    { id: 14, name: 'Alexander Martin', NIP: '456789', programStudi: 'Sistem Informasi', status: 'tidak aktif' },
-    { id: 15, name: 'Mia Thompson', NIP: '567890', programStudi: 'Rekayasa Perangkat Lunak', status: 'aktif' },
-    { id: 16, name: 'Ethan Garcia', NIP: '678901', programStudi: 'Sistem Informasi', status: 'aktif' },
-    { id: 17, name: 'Charlotte Rodriguez', NIP: '789012', programStudi: 'Informatika', status: 'tidak aktif' },
-    { id: 18, name: 'Benjamin Martinez', NIP: '890123', programStudi: 'Rekayasa Perangkat Lunak', status: 'tidak aktif' },
-    { id: 19, name: 'Madison Lopez', NIP: '901234', programStudi: 'Sistem Informasi', status: 'aktif' },
-    { id: 20, name: 'Jacob Lee', NIP: '012345', programStudi: 'Informatika', status: 'aktif' },
-];
-
-
+import PrintMember from '../Home/PrintMember';
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
@@ -46,7 +21,22 @@ const MemberTable = () => {
     const [filterOpen, setFilterOpen] = useState(false);
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
+    const [members, setMembers] = useState([]);
     const componentRef = useRef();
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/member/get');
+                const data = await response.json();
+                setMembers(data.response);
+            } catch (error) {
+                console.error('Error fetching members:', error);
+            }
+        };
+
+        fetchMembers();
+    }, []);
 
     const handleStatusFilterChange = (event) => {
         setStatusFilter(event.target.value);
@@ -108,9 +98,15 @@ const MemberTable = () => {
         endRange = members.length;
     }
 
-    const handleOpen = (member) => {
-        setSelectedMember(member);
-        setOpen(true);
+    const handleOpen = async (member) => {
+        try {
+            const response = await fetch(`http://localhost:5000/member/get/${member.id}`);
+            const data = await response.json();
+            setSelectedMember(data);
+            setOpen(true);
+        } catch (error) {
+            console.error('Error fetching member details:', error);
+        }
     };
 
     const handleClose = () => {
@@ -257,9 +253,9 @@ const MemberTable = () => {
                         {currentMembers.map((member, index) => (
                             <tr key={member.id}>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{indexOfFirstItem + index + 1}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.name}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.NIP}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.programStudi}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.nama}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.nip}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
                                 <td className="px-4 py-2 whitespace-nowrap flex justify-center">
                                     <IconButton onClick={() => handleOpen(member)}>
                                         <VisibilityIcon style={{ color: '#1677BD' }} />
