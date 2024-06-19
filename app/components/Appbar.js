@@ -11,21 +11,23 @@ import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useRouter } from 'next/navigation';
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiList-root': {
-    padding: 0, // Remove default padding for cleaner look
-    backgroundColor: theme.palette.grey[200], // Set background color to grey
+    padding: 0, 
+    backgroundColor: theme.palette.grey[200], 
   },
   '& .MuiMenuItem-root': {
-    display: 'flex', // Allow for side-by-side placement of icon and text
-    alignItems: 'center', // Align icon and text vertically
+    display: 'flex', 
+    alignItems: 'center', 
   },
 }));
 
 const MyAppBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  const router = useRouter();
 
   const handleDarkModeToggle = () => {
     setDarkMode(!darkMode);
@@ -41,14 +43,12 @@ const MyAppBar = () => {
   };
 
   const handleLogout = () => {
-    // Implement logout functionality here, such as API call, cookie removal, etc.
-    console.log('Logout initiated!'); // Placeholder for now
-
-    // Optionally, redirect to login page after successful logout
-    // window.location.href = '/login'; // Replace with your login URL
-
-    handleMenuClose(); // Close the dropdown after logout
+    localStorage.removeItem('token');
+    handleMenuClose(); 
+    router.push('/');
+    console.log('Logout initiated!'); 
   };
+
 
   return (
     <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
@@ -70,7 +70,7 @@ const MyAppBar = () => {
             onClose={handleMenuClose}
           >
             <MenuItem onClick={handleLogout} className='hover:bg-red-700 hover:text-white rounded-none'>
-              <LogoutIcon /> {/* Add your LogoutIcon component here */}
+              <LogoutIcon />
               <span style={{ marginLeft: '10px' }}>Logout</span>
             </MenuItem>
           </StyledMenu>
