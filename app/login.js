@@ -12,21 +12,50 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/loginAdmin`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
-    });
-    const data = await res.json();
+    try {
+      // Attempt to login as admin
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/loginAdmin`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
 
-    if (res.ok) {
-      setMessage("Login successful!");
-      router.push("/dashboard");
-      localStorage.setItem('token', data.token);
-    } else {
-      setMessage(data.response);
+      if (res.ok) {
+        setMessage("Login successful!");
+        router.push("/dashboard");
+        localStorage.setItem('token', data.token);
+      } else {
+        // If admin login fails, attempt member login
+        throw new Error("Admin login failed");
+      }
+    } catch (error) {
+      console.error("Admin login failed, trying member login:", error);
+
+      try {
+        // Attempt to login as member
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/loginMember`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          setMessage("Login successful as member!");
+          router.push("/dashboard");
+          localStorage.setItem('token', data.token);
+        } else {
+          setMessage(data.response || "Login failed");
+        }
+      } catch (error) {
+        console.error("Member login failed:", error);
+        setMessage("Login failed. Please try again.");
+      }
     }
   };
 

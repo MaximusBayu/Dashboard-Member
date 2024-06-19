@@ -15,7 +15,6 @@ const SideNavbar = () => {
   const adminName = "Admin";
 
   useEffect(() => {
-    // Function to check if user is admin based on token
     const checkAdminRole = () => {
       const token = localStorage.getItem('token'); // Get token from localStorage
       if (token) {
