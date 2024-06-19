@@ -12,7 +12,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:5000/auth/loginAdmin", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/loginAdmin`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,6 +24,7 @@ const Login = () => {
     if (res.ok) {
       setMessage("Login successful!");
       router.push("/dashboard");
+      localStorage.setItem('token', data.token);
     } else {
       setMessage(data.response);
     }
