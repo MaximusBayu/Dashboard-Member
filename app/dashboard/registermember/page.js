@@ -45,7 +45,7 @@ const RegMember = () => {
     console.log(data);
 
     try {
-      const res = await fetch("http://localhost:5000/auth/registerMember", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registerMember`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
