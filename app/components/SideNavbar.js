@@ -1,19 +1,32 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
+import {jwtDecode} from 'jwt-decode'; // Import jwt-decode library to decode JWT tokens
 
-
-const SideNavbar = ({ isAdmin = true }) => {
+const SideNavbar = () => {
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false); // State to determine admin role
   const adminName = "Admin";
+
+  useEffect(() => {
+    // Function to check if user is admin based on token
+    const checkAdminRole = () => {
+      const token = localStorage.getItem('token'); // Get token from localStorage
+      if (token) {
+        const decoded = jwtDecode(token); // Decode the token payload
+        const userRole = decoded.role; // Assuming 'role' is the key in token payload for role
+        setIsAdmin(userRole === 'admin'); // Set isAdmin state based on role
+      }
+    };
+
+    checkAdminRole(); // Call function on component mount
+  }, []);
 
   return (
     <div className="h-screen fixed top-20 pb-24 w-64 bg-white text-gray-700 flex flex-col items-center py-10 rounded-r-3xl border border-gray-300 shadow-xl">

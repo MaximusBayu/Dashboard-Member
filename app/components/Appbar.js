@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { useRouter } from 'next/navigation';
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiList-root': {
@@ -26,6 +27,7 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
 const MyAppBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  const router = useRouter();
 
   const handleDarkModeToggle = () => {
     setDarkMode(!darkMode);
@@ -41,14 +43,12 @@ const MyAppBar = () => {
   };
 
   const handleLogout = () => {
-    // Implement logout functionality here, such as API call, cookie removal, etc.
-    console.log('Logout initiated!'); // Placeholder for now
-
-    // Optionally, redirect to login page after successful logout
-    // window.location.href = '/login'; // Replace with your login URL
-
+    localStorage.removeItem('token');
     handleMenuClose(); // Close the dropdown after logout
+    router.push('/');
+    console.log('Logout initiated!'); 
   };
+
 
   return (
     <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
