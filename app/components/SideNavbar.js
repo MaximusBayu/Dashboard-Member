@@ -7,24 +7,24 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
 import { useRouter } from 'next/navigation';
-import {jwtDecode} from 'jwt-decode'; // Import jwt-decode library to decode JWT tokens
+import {jwtDecode} from 'jwt-decode'; 
 
 const SideNavbar = () => {
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false); // State to determine admin role
+  const [isAdmin, setIsAdmin] = useState(false); 
   const adminName = "Admin";
 
   useEffect(() => {
     const checkAdminRole = () => {
-      const token = localStorage.getItem('token'); // Get token from localStorage
+      const token = localStorage.getItem('token'); 
       if (token) {
-        const decoded = jwtDecode(token); // Decode the token payload
-        const userRole = decoded.role; // Assuming 'role' is the key in token payload for role
-        setIsAdmin(userRole === 'admin'); // Set isAdmin state based on role
+        const decoded = jwtDecode(token); 
+        const userRole = decoded.role; 
+        setIsAdmin(userRole === 'admin'); 
       }
     };
 
-    checkAdminRole(); // Call function on component mount
+    checkAdminRole(); 
   }, []);
 
   return (

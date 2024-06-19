@@ -28,7 +28,6 @@ const Login = () => {
         router.push("/dashboard");
         localStorage.setItem('token', data.token);
       } else {
-        // If admin login fails, attempt member login
         throw new Error("Admin login failed");
       }
     } catch (error) {

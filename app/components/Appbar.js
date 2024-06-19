@@ -15,12 +15,12 @@ import { useRouter } from 'next/navigation';
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiList-root': {
-    padding: 0, // Remove default padding for cleaner look
-    backgroundColor: theme.palette.grey[200], // Set background color to grey
+    padding: 0, 
+    backgroundColor: theme.palette.grey[200], 
   },
   '& .MuiMenuItem-root': {
-    display: 'flex', // Allow for side-by-side placement of icon and text
-    alignItems: 'center', // Align icon and text vertically
+    display: 'flex', 
+    alignItems: 'center', 
   },
 }));
 
@@ -44,7 +44,7 @@ const MyAppBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    handleMenuClose(); // Close the dropdown after logout
+    handleMenuClose(); 
     router.push('/');
     console.log('Logout initiated!'); 
   };
@@ -70,7 +70,7 @@ const MyAppBar = () => {
             onClose={handleMenuClose}
           >
             <MenuItem onClick={handleLogout} className='hover:bg-red-700 hover:text-white rounded-none'>
-              <LogoutIcon /> {/* Add your LogoutIcon component here */}
+              <LogoutIcon />
               <span style={{ marginLeft: '10px' }}>Logout</span>
             </MenuItem>
           </StyledMenu>
