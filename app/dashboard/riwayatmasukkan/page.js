@@ -6,7 +6,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import MemberDialog from '../home/MemberDialog';
 import ReactToPrint from 'react-to-print';
 
@@ -17,8 +16,6 @@ const MemberTable = () => {
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
-    const [filterOpen, setFilterOpen] = useState(false);
-    const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
     const tableRef = useRef();
@@ -46,36 +43,6 @@ const MemberTable = () => {
     const handleStatusFilterChange = (event) => {
         setStatusFilter(event.target.value);
     };
-
-    const handleFilterOpen = () => {
-        setFilterOpen(true);
-    };
-
-    const handleFilterClose = () => {
-        setFilterOpen(false);
-    };
-
-    const handleFilterChange = (event) => {
-        setSelectedFilter(event.target.value);
-    };
-
-    const handleClickOutsideFilter = (event) => {
-        const filterDropdown = document.getElementById('filter-dropdown');
-        if (filterDropdown && !filterDropdown.contains(event.target)) {
-            handleFilterClose();
-        }
-    };
-
-    useEffect(() => {
-        if (filterOpen) {
-            document.addEventListener('click', handleClickOutsideFilter);
-        } else {
-            document.removeEventListener('click', handleClickOutsideFilter);
-        }
-        return () => {
-            document.removeEventListener('click', handleClickOutsideFilter);
-        };
-    }, [filterOpen]);
 
     const handlePrintOpen = () => {
         setConfirmationOpen(true);
@@ -125,24 +92,16 @@ const MemberTable = () => {
         setCurrentPage(1);
     };
 
-
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
         setCurrentPage(1);
     };
 
-    const filteredMembers = members.filter((member) => {
-        if (selectedFilter) {
-            return member.fakultas === selectedFilter;
-        }
-        return true;
-    });
-
     const sortedMembers = statusFilter === 'aktif' ?
-        filteredMembers.filter(member => member.status === 'aktif') :
+        members.filter(member => member.status === 'aktif') :
         statusFilter === 'tidak-aktif' ?
-            filteredMembers.filter(member => member.status === 'tidak aktif') :
-            filteredMembers;
+            members.filter(member => member.status === 'tidak aktif') :
+            members;
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -150,9 +109,9 @@ const MemberTable = () => {
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                String(member.nip).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.program_studi.toLowerCase().includes(searchTerm.toLowerCase())
+                (member.nama && member.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.username && String(member.username).toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
@@ -169,7 +128,6 @@ const MemberTable = () => {
         const seconds = String(date.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
-
 
     return (
         <div className="container mx-auto my-8 max-w-screen-lg overflow-x-auto">
@@ -189,60 +147,8 @@ const MemberTable = () => {
                                         <option key={option} value={option}>{option}</option>
                                     ))}
                                 </select>
-
                                 <span className="text-sm">Data</span>
                             </div>
-                            <button
-                                className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-md flex items-center"
-                                onClick={handleFilterOpen}
-                            >
-                                <FilterListIcon />
-                                <span className="ml-2">Filters</span>
-                            </button>
-                            {filterOpen && (
-                                <div id="filter-dropdown" className="absolute top-36 mt-2 ml-36 w-64 bg-white border border-gray-300 rounded-md shadow-lg p-4 z-10">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h3 className="text-sm font-semibold">Filters</h3>
-                                        <button className="text-sm text-gray-600" onClick={handleFilterClose}>Close</button>
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="filter-select" className="block text-sm font-semibold mb-1">Filter by Fakultas</label>
-                                        <select
-                                            id="filter-select"
-                                            className="block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-400"
-                                            value={selectedFilter}
-                                            onChange={handleFilterChange}
-                                        >
-                                            <option value="" >All</option>
-                                            <option value="Informatika">Informatika</option>
-                                            <option value="Rekayasa Industri">Rekayasa Industri</option>
-                                            <option value="Teknik Elektro">Teknik Elektro</option>
-                                        </select>
-                                    </div>
-                                    <div className="mb-4">
-                                        <span className="block text-sm font-semibold mb-1">Status</span>
-                                        <div>
-                                            <input
-                                                type="checkbox"
-                                                id="aktif"
-                                                checked={statusFilter === 'aktif'}
-                                                onChange={() => setStatusFilter(statusFilter === 'aktif' ? '' : 'aktif')}
-                                            />
-                                            <label htmlFor="aktif" className="ml-2">Aktif</label>
-                                        </div>
-                                        <div>
-                                            <input
-                                                type="checkbox"
-                                                id="tidak aktif"
-                                                checked={statusFilter === 'tidak aktif'}
-                                                onChange={() => setStatusFilter(statusFilter === 'tidak aktif' ? '' : 'tidak aktif')}
-                                            />
-                                            <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            )}
                         </div>
                     </div>
                     <div className="flex items-center">
@@ -270,8 +176,8 @@ const MemberTable = () => {
                         <tr>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300 size-0">No</th>
                             <th className="px-4 py-2 text-left text-xs font-bold text-white uppercase border-r border-gray-300">Name</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">NIP</th>
-                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Program Studi</th>
+                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Username</th>
+                            <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase border-r border-gray-300">Email</th>
                             <th className="px-4 py-2 text-center text-xs font-bold text-white uppercase">Waktu Input</th>
                         </tr>
                     </thead>
@@ -280,10 +186,9 @@ const MemberTable = () => {
                             <tr key={member.id}>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{indexOfFirstItem + index + 1}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300">{member.nama}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.nip}</td>
-                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.username}</td>
+                                <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.email}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{formatDate(member.tanggal_input)}</td>
-
                             </tr>
                         ))}
                     </tbody>
@@ -313,7 +218,6 @@ const MemberTable = () => {
             </div>
 
             <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
-
         </div>
     );
 };
