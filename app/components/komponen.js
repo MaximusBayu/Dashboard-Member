@@ -41,7 +41,7 @@ const KomponenPage = () => {
 
   return (
     <div>
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+      <div style={{ textAlign: "start", marginBottom: "20px", fontWeight: "bold" }}>
         <h1>Halo Admin,</h1>
         <h1>Selamat Datang di Dashboard Member Humic Engineering</h1>
       </div>

@@ -4,6 +4,7 @@ import MemberTable from './home/MemberList';
 import InfoMember from '../components/karousel';
 import BiodataMember from './home/memberPopup';
 import {jwtDecode} from 'jwt-decode';
+import KomponenPage from '../components/komponen';
 
 const Home = () => {
   const [isAdmin, setIsAdmin] = useState(false); 
@@ -25,7 +26,7 @@ const Home = () => {
 
   return (
     <div>
-      {isAdmin && <InfoMember />} 
+      {isAdmin && <KomponenPage />} 
       {isAdmin && <MemberTable />} 
       {!isAdmin && <BiodataMember />} 
     </div>
