@@ -13,7 +13,6 @@ import BiodataMember from './memberPopup'
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
-    const [selectedMember, setSelectedMember] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');

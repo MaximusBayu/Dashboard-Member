@@ -1,11 +1,11 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
 import { jwtDecode } from 'jwt-decode';
 
-const BiodataMember = ({ memberId }) => {
+const BiodataMember = ({ memberId: propMemberId }) => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,8 +15,29 @@ const BiodataMember = ({ memberId }) => {
     const [newEducation, setNewEducation] = useState({ degree: '', universitas: '' });
     const [selectedFile, setSelectedFile] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
+    const [userRole, setUserRole] = useState(null);
+    const [memberId, setMemberId] = useState(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const decodedToken = jwtDecode(token);
+                setUserRole(decodedToken.role);
+                // If propMemberId is not provided, use the id from the token
+                setMemberId(propMemberId || decodedToken.id);
+            } catch (error) {
+                console.error("Error decoding token:", error);
+                setError("Error decoding token");
+            }
+        } else {
+            setError("No token found");
+        }
+    }, [propMemberId]);
 
     const fetchMemberData = async () => {
+        if (!memberId) return;
+
         setLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
@@ -102,8 +123,18 @@ const BiodataMember = ({ memberId }) => {
         }
     };
 
-    const handleFileChange = (e) => {
-        setSelectedFile(e.target.files[0]);
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (validTypes.includes(file.type)) {
+                setSelectedFile(file);
+                setError(null); 
+            } else {
+                setSelectedFile(null);
+                setError('Please select a valid image file (JPG, JPEG, or PNG).');
+            }
+        }
     };
 
     const handleFileUpload = async () => {
@@ -353,13 +384,27 @@ const BiodataMember = ({ memberId }) => {
                         <Grid item>
                             <img src={userInfo.foto} alt="Member" style={{ width: '150px', borderRadius: '4px' }} />
                         </Grid>
-                        <Grid item>
-                            <Input
-                                type="file"
-                                onChange={handleFileChange}
-                                onClick={handleFileUpload}
-                            />
-                        </Grid>
+                        {editMode && (
+                            <Grid item>
+                                <Input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    inputProps={{
+                                        accept: "image/jpeg, image/png, image/jpg"
+                                    }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleFileUpload}
+                                    disabled={!selectedFile}
+                                    size="small"
+                                    style={{ marginTop: '8px' }}
+                                >
+                                    Upload Photo
+                                </Button>
+                            </Grid>
+                        )}
                         <Grid item>
                             <Grid container alignItems="center">
                                 <Typography variant="subtitle1">Status Member</Typography>
@@ -429,26 +474,28 @@ const BiodataMember = ({ memberId }) => {
                     )}
                 </Grid>
                 <Grid item xs={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    {editMode ? (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<SaveIcon />}
-                            style={{ marginLeft: '10px' }}
-                            onClick={handleSaveClick}
-                        >
-                            Simpan
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<EditIcon />}
-                            style={{ marginLeft: '10px' }}
-                            onClick={handleEditClick}
-                        >
-                            Edit
-                        </Button>
+                    {(userRole === 'member' && memberId === userInfo?.id) && (
+                        editMode ? (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<SaveIcon />}
+                                style={{ marginLeft: '10px' }}
+                                onClick={handleSaveClick}
+                            >
+                                Simpan
+                            </Button>
+                        ) : (
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<EditIcon />}
+                                style={{ marginLeft: '10px' }}
+                                onClick={handleEditClick}
+                            >
+                                Edit
+                            </Button>
+                        )
                     )}
                 </Grid>
             </Grid>
