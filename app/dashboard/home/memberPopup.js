@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import PrintIcon from '@mui/icons-material/Print';
 import SaveIcon from '@mui/icons-material/Save';
@@ -14,6 +14,7 @@ const BiodataMember = () => {
     const [formData, setFormData] = useState({});
     const [educationHistory, setEducationHistory] = useState([]);
     const [newEducation, setNewEducation] = useState({ degree: '', universitas: '' });
+    const [selectedFile, setSelectedFile] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
 
     useEffect(() => {
@@ -88,7 +89,6 @@ const BiodataMember = () => {
 
             if (response.ok) {
                 setEditMode(false);
-                // Fetch updated member data
             } else {
                 setError('Error updating member data');
             }
@@ -107,6 +107,44 @@ const BiodataMember = () => {
             setEducationHistory([...educationHistory, newEducation]);
             setNewEducation({ degree: '', universitas: '' });
         }
+    };
+
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
+
+    const handleFileUpload = async () => {
+        if (!selectedFile) {
+            setError('Please select a file to upload.');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/uploadPhoto`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                const updatedUserInfo = await response.json();
+                setUserInfo(updatedUserInfo);
+                setSelectedFile(null);
+            } else {
+                setError('Error uploading photo');
+            }
+        } catch (error) {
+            console.error('Error uploading photo:', error);
+            setError('Error uploading photo');
+        }
+    };
+
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     };
 
     if (loading) {
@@ -306,19 +344,19 @@ const BiodataMember = () => {
                             )}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <Typography variant="subtitle1">Tanggal Lahir {validationErrors.tanggal_lahir && <span style={{ color: 'red' }}>*</span>}</Typography>
+                            <Typography variant="subtitle1">Tanggal Lahir *</Typography>
                             {editMode ? (
                                 <TextField
                                     name="tanggal_lahir"
-                                    placeholder="DD/MM/YYYY"
-                                    value={formData.tanggal_lahir || ''}
+                                    type="date"
+                                    value={formData.tanggal_lahir ? formatDate(formData.tanggal_lahir) : ''}
                                     onChange={handleInputChange}
                                     variant="outlined"
                                     size="small"
-                                    error={!!validationErrors.tanggal_lahir}
+                                    error={!formData.tanggal_lahir}
                                 />
                             ) : (
-                                <Typography variant="body2">{userInfo.tanggal_lahir}</Typography>
+                                <Typography variant="body2">{userInfo.tanggal_lahir ? formatDate(userInfo.tanggal_lahir) : ''}</Typography>
                             )}
                         </Grid>
                     </Grid>
@@ -327,6 +365,13 @@ const BiodataMember = () => {
                     <Grid container spacing={2} direction="column" alignItems="center">
                         <Grid item>
                             <img src={userInfo.foto} alt="Member" style={{ width: '150px', borderRadius: '4px' }} />
+                        </Grid>
+                        <Grid item>
+                            <Input
+                                type="file"
+                                onChange={handleFileChange}
+                                onClick={handleFileUpload}
+                            />
                         </Grid>
                         <Grid item>
                             <Grid container alignItems="center">
