@@ -6,12 +6,14 @@ import { useForm } from "react-hook-form";
 
 const RegMember = () => {
   const [message, setMessage] = useState("");
+  const [open, setOpen] = useState(false);
   const router = useRouter();
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
+    reset,
   } = useForm();
 
   const onSubmit = async (data) => {
@@ -32,7 +34,6 @@ const RegMember = () => {
         type: "manual",
         message: "Password kurang dari 7 karakter",
       });
-
       return;
     }
     if (data.password !== data.confirmPassword) {
@@ -42,7 +43,6 @@ const RegMember = () => {
       });
       return;
     }
-    console.log(data);
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/registerMember`, {
@@ -62,6 +62,8 @@ const RegMember = () => {
 
       if (res.ok) {
         setMessage("Registrasi berhasil!");
+        setOpen(true);  // Open the modal
+        reset();  // Reset form fields after successful submission
       } else {
         setMessage(result.message);
       }
@@ -69,6 +71,8 @@ const RegMember = () => {
       setMessage("Terjadi kesalahan. Coba lagi nanti.");
     }
   };
+
+  const handleClose = () => setOpen(false);
 
   return (
     <div className="bg-white shadow-xl w-2/3 h- text-black rounded-xl flex flex-col mt-3 p-14">
@@ -104,7 +108,7 @@ const RegMember = () => {
           {errors.email && <p>{errors.email.message}</p>}
         </div>
         <div className="float-left">
-          <label htmlForr="username" className="block  mt-2 mb-1">
+          <label htmlFor="username" className="block  mt-2 mb-1">
             Username
           </label>
           <input
@@ -151,7 +155,23 @@ const RegMember = () => {
           value="Register"
         />
       </form>
+
+      {open && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-semibold mb-4">Registrasi Berhasil!</h2>
+            <p className="mb-4">Akun member telah berhasil didaftarkan.</p>
+            <button
+              onClick={handleClose}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded self-end"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 export default RegMember;
