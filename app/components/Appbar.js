@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -12,6 +12,7 @@ import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
+import {jwtDecode} from 'jwt-decode';
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiList-root': {
@@ -26,13 +27,36 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
 
 const MyAppBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [adminName, setAdminName] = useState("Admin"); 
+  const [avatarSrc, setAvatarSrc] = useState(null);
   const router = useRouter();
 
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-    // Implement dark mode toggle logic here, such as updating a context or theme provider
-  };
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const decoded = jwtDecode(token);
+        setAdminName(decoded.username);
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${decoded.id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setAvatarSrc(data.avatarUrl || null);
+          } else {
+            console.error('Failed to fetch user data');
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      }
+    };
+
+    fetchAdminData();
+  }, []);
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -49,7 +73,6 @@ const MyAppBar = () => {
     console.log('Logout initiated!'); 
   };
 
-
   return (
     <AppBar position="static" style={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
       <Toolbar className="flex justify-between">
@@ -57,9 +80,10 @@ const MyAppBar = () => {
           <img src="/humic.svg" alt="Logo" className="h-14" />
         </Typography>
         <div className="flex items-center space-x-4">
-          <Switch checked={darkMode} onChange={handleDarkModeToggle} color="default" />
           <IconButton onClick={handleMenuOpen}>
-            <Avatar alt="Avatar" src="/path/to/your/avatar.jpg" />
+            <Avatar alt={adminName} src={avatarSrc}>
+              {!avatarSrc && adminName[0]}
+            </Avatar>
           </IconButton>
           <StyledMenu
             id="menu-appbar"
