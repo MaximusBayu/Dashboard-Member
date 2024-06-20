@@ -26,9 +26,9 @@ const BiodataMember = () => {
                     throw new Error('No token found');
                 }
                 const decodedToken = jwtDecode(token);
-                const memberId = decodedToken.username;
+                const memberId = decodedToken.id;
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/2`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
