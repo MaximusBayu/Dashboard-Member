@@ -109,9 +109,9 @@ const MemberTable = () => {
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                String(member.username).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.email.toLowerCase().includes(searchTerm.toLowerCase())
+                (member.nama && member.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.username && String(member.username).toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.email && member.email.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
