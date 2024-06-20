@@ -9,10 +9,10 @@ import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import MemberDialog from './MemberDialog';
 import ReactToPrint from 'react-to-print';
+import BiodataMember from './memberPopup'
 
 const MemberTable = () => {
     const [open, setOpen] = useState(false);
-    const [selectedMember, setSelectedMember] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +21,7 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
+    const [selectedMemberId, setSelectedMemberId] = useState(null);
     const tableRef = useRef();
 
     useEffect(() => {
@@ -103,20 +104,14 @@ const MemberTable = () => {
         endRange = members.length;
     }
 
-    const handleOpen = async (member) => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${member.id}`);
-            const data = await response.json();
-            setSelectedMember(data);
-            setOpen(true);
-        } catch (error) {
-            console.error('Error fetching member details:', error);
-        }
+    const handleOpen = (memberId) => {
+        setSelectedMemberId(memberId);
+        setOpen(true);
     };
 
     const handleClose = () => {
         setOpen(false);
-        setSelectedMember(null);
+        setSelectedMemberId(null);
     };
 
     const handleItemsPerPageChange = (event) => {
@@ -273,7 +268,7 @@ const MemberTable = () => {
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.program_studi}</td>
                                 <td className="px-4 py-2 whitespace-nowrap border-r border-gray-300 text-center">{member.fakultas}</td>
                                 <td className="px-4 py-2 whitespace-nowrap flex justify-center">
-                                    <IconButton onClick={() => handleOpen(member)}>
+                                    <IconButton onClick={() => handleOpen(member.id)}>
                                         <VisibilityIcon style={{ color: '#1677BD' }} />
                                     </IconButton>
                                 </td>
@@ -305,8 +300,18 @@ const MemberTable = () => {
                 </div>
             </div>
 
-            <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
-
+            {open && selectedMemberId && (
+                <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+                    <DialogContent>
+                        <BiodataMember memberId={selectedMemberId} />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            Close
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
         </div>
     );
 };
