@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import PrintIcon from '@mui/icons-material/Print';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
 import { jwtDecode } from 'jwt-decode';
@@ -17,37 +16,37 @@ const BiodataMember = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [validationErrors, setValidationErrors] = useState({});
 
-    useEffect(() => {
-        const fetchMemberData = async () => {
-            setLoading(true);
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    throw new Error('No token found');
-                }
-                const decodedToken = jwtDecode(token);
-                const memberId = decodedToken.id;
-
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                if (data.response) {
-                    setUserInfo(data.response);
-                } else {
-                    setError('Member not found');
-                }
-            } catch (error) {
-                console.error("Error fetching member data:", error);
-                setError('Error fetching member data');
-            } finally {
-                setLoading(false);
+    const fetchMemberData = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                throw new Error('No token found');
             }
-        };
+            const decodedToken = jwtDecode(token);
+            const memberId = decodedToken.id;
 
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            if (data.response) {
+                setUserInfo(data.response);
+            } else {
+                setError('Member not found');
+            }
+        } catch (error) {
+            console.error("Error fetching member data:", error);
+            setError('Error fetching member data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchMemberData();
-    }, []);
+    }, [editMode]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -188,15 +187,13 @@ const BiodataMember = () => {
                             <Typography variant="subtitle1">Jenis Kelamin</Typography>
                             {editMode ? (
                                 <FormControl fullWidth variant="outlined" size="small">
-                                    <InputLabel>Jenis Kelamin</InputLabel>
                                     <Select
                                         name="jenis_kelamin"
-                                        value={formData.jenis_kelamin || ''}
+                                        value={formData.jenis_kelamin}
                                         onChange={handleInputChange}
-                                        label="Jenis Kelamin"
                                     >
-                                        <MenuItem value="laki-laki">Laki-laki</MenuItem>
-                                        <MenuItem value="perempuan">Perempuan</MenuItem>
+                                        <MenuItem value="Laki-laki">Laki-laki</MenuItem>
+                                        <MenuItem value="Perempuan">Perempuan</MenuItem>
                                     </Select>
                                 </FormControl>
                             ) : (
@@ -223,19 +220,17 @@ const BiodataMember = () => {
                             <Typography variant="subtitle1">Agama</Typography>
                             {editMode ? (
                                 <FormControl fullWidth variant="outlined" size="small">
-                                    <InputLabel>Agama</InputLabel>
                                     <Select
                                         name="agama"
-                                        value={formData.agama || ''}
+                                        value={formData.agama}
                                         onChange={handleInputChange}
-                                        label="Agama"
                                     >
-                                        <MenuItem value="islam">Islam</MenuItem>
-                                        <MenuItem value="kristen">Kristen</MenuItem>
-                                        <MenuItem value="budha">Budha</MenuItem>
-                                        <MenuItem value="hindu">Hindu</MenuItem>
-                                        <MenuItem value="katolik">Katolik</MenuItem>
-                                        <MenuItem value="khonghucu">Khonghucu</MenuItem>
+                                        <MenuItem value="Islam">Islam</MenuItem>
+                                        <MenuItem value="Kristen">Kristen</MenuItem>
+                                        <MenuItem value="Budha">Budha</MenuItem>
+                                        <MenuItem value="Hindu">Hindu</MenuItem>
+                                        <MenuItem value="Katolik">Katolik</MenuItem>
+                                        <MenuItem value="Khonghucu">Khonghucu</MenuItem>
                                     </Select>
                                 </FormControl>
                             ) : (
@@ -294,12 +289,10 @@ const BiodataMember = () => {
                             <Typography variant="subtitle1">Golongan Darah</Typography>
                             {editMode ? (
                                 <FormControl fullWidth variant="outlined" size="small">
-                                    <InputLabel>Golongan Darah</InputLabel>
                                     <Select
                                         name="golongan_darah"
-                                        value={formData.golongan_darah || ''}
+                                        value={formData.golongan_darah}
                                         onChange={handleInputChange}
-                                        label="Golongan Darah"
                                     >
                                         <MenuItem value="A">A</MenuItem>
                                         <MenuItem value="B">B</MenuItem>
@@ -344,7 +337,7 @@ const BiodataMember = () => {
                             )}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <Typography variant="subtitle1">Tanggal Lahir *</Typography>
+                            <Typography variant="subtitle1">Tanggal Lahir</Typography>
                             {editMode ? (
                                 <TextField
                                     name="tanggal_lahir"
@@ -380,12 +373,10 @@ const BiodataMember = () => {
                             </Grid>
                             {editMode ? (
                                 <FormControl variant="outlined" size="small" error={!!validationErrors.status}>
-                                    <InputLabel>Status Member</InputLabel>
                                     <Select
                                         name="status"
                                         value={formData.status || ''}
                                         onChange={handleInputChange}
-                                        label="Status Member"
                                     >
                                         <MenuItem value=""><em>Pilih Status</em></MenuItem>
                                         <MenuItem value="aktif">Aktif</MenuItem>
@@ -408,41 +399,42 @@ const BiodataMember = () => {
                             </Grid>
                             <Grid item xs={12} sm={3}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
-                                <Typography variant="body2" style={{ color: 'gray' }}>{edu.universitas}</Typography>
+                                <Typography variant="body2">{edu.universitas}</Typography>
                             </Grid>
                         </Grid>
                     ))}
-                    <Box mt={2} display="flex" alignItems="center">
-                        <FormControl variant="outlined" size="small" style={{ marginRight: '10px', minWidth: 120 }}>
-                            <InputLabel>Pendidikan Terakhir</InputLabel>
-                            <Select
-                                name="degree"
-                                value={newEducation.degree}
+                    {editMode && (
+                        <Box mt={2} display="flex" alignItems="center">
+                            <FormControl variant="outlined" size="small" style={{ marginRight: '10px', minWidth: 120 }}>
+                                <InputLabel>Pendidikan Terakhir</InputLabel>
+                                <Select
+                                    name="degree"
+                                    value={newEducation.degree}
+                                    onChange={handleNewEducationChange}
+                                    label="Pendidikan Terakhir"
+                                >
+                                    <MenuItem value=""><em>Pilih Pendidikan</em></MenuItem>
+                                    <MenuItem value="S1">S1</MenuItem>
+                                    <MenuItem value="S2">S2</MenuItem>
+                                    <MenuItem value="S3">S3</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <TextField
+                                name="universitas"
+                                label="Universitas"
+                                value={newEducation.universitas}
                                 onChange={handleNewEducationChange}
-                                label="Pendidikan Terakhir"
-                            >
-                                <MenuItem value=""><em>Pilih Pendidikan</em></MenuItem>
-                                <MenuItem value="S1">S1</MenuItem>
-                                <MenuItem value="S2">S2</MenuItem>
-                                <MenuItem value="S3">S3</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <TextField
-                            name="universitas"
-                            label="Universitas"
-                            value={newEducation.universitas}
-                            onChange={handleNewEducationChange}
-                            variant="outlined"
-                            size="small"
-                            style={{ marginRight: '10px' }}
-                        />
-                        <IconButton color="primary" onClick={handleAddEducation}>
-                            <AddIcon />
-                        </IconButton>
-                    </Box>
+                                variant="outlined"
+                                size="small"
+                                style={{ marginRight: '10px' }}
+                            />
+                            <IconButton color="primary" onClick={handleAddEducation}>
+                                <AddIcon />
+                            </IconButton>
+                        </Box>
+                    )}
                 </Grid>
                 <Grid item xs={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button variant="outlined" startIcon={<PrintIcon />}>Print</Button>
                     {editMode ? (
                         <Button
                             variant="contained"
