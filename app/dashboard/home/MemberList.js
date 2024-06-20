@@ -21,7 +21,7 @@ const MemberTable = () => {
     const [selectedFilter, setSelectedFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [members, setMembers] = useState([]);
-    const tableRef = useRef(); 
+    const tableRef = useRef();
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -150,9 +150,9 @@ const MemberTable = () => {
         .filter((member) => {
             if (searchTerm === '') return true;
             return (
-                member.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                String(member.nip).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                member.program_studi.toLowerCase().includes(searchTerm.toLowerCase())
+                (member.nama && member.nama.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.nip && String(member.nip).toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (member.program_studi && member.program_studi.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         })
         .slice(indexOfFirstItem, indexOfLastItem);
