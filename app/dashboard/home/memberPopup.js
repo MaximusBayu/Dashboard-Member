@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState} from 'react';
 import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
 import { jwtDecode } from 'jwt-decode';
 
-const BiodataMember = () => {
+const BiodataMember = ({ memberId }) => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,13 +19,6 @@ const BiodataMember = () => {
     const fetchMemberData = async () => {
         setLoading(true);
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                throw new Error('No token found');
-            }
-            const decodedToken = jwtDecode(token);
-            const memberId = decodedToken.id;
-
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -33,6 +26,7 @@ const BiodataMember = () => {
             const data = await response.json();
             if (data.response) {
                 setUserInfo(data.response);
+                setEducationHistory(data.response.pendidikan || []);
             } else {
                 setError('Member not found');
             }
@@ -46,7 +40,7 @@ const BiodataMember = () => {
 
     useEffect(() => {
         fetchMemberData();
-    }, [editMode]);
+    }, [editMode, memberId]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
