@@ -62,7 +62,6 @@ const RegMember = () => {
 
       if (res.ok) {
         setMessage("Registrasi berhasil!");
-        router.push("/Home");
       } else {
         setMessage(result.message);
       }
