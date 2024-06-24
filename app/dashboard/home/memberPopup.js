@@ -3,6 +3,7 @@ import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, F
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { jwtDecode } from 'jwt-decode';
 
 const BiodataMember = ({ memberId: propMemberId }) => {
@@ -17,6 +18,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     const [validationErrors, setValidationErrors] = useState({});
     const [userRole, setUserRole] = useState(null);
     const [memberId, setMemberId] = useState(null);
+    const [highestRowNumber, setHighestRowNumber] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -47,7 +49,6 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const data = await response.json();
             if (data.response) {
                 setUserInfo(data.response);
-                setEducationHistory(data.response.pendidikan || []);
             } else {
                 setError('Member not found');
             }
@@ -59,8 +60,39 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         }
     };
 
+    const fetchEducationHistory = async () => {
+        if (!memberId) return;
+
+        setLoading(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/getAll/${memberId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            const formattedEducationHistory = data.response.map(item => ({
+                id: item.id,
+                degree: item.riwayat_pendidikan,
+                universitas: item.riwayat_universitas,
+                rowRiwayat: item.rowRiwayat
+            }));
+            setEducationHistory(formattedEducationHistory);
+
+            const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
+            setHighestRowNumber(maxRow);
+
+            console.log(formattedEducationHistory);
+        } catch (error) {
+            console.error("Error fetching education history:", error);
+            setError('Error fetching education history');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchMemberData();
+        fetchEducationHistory();
     }, [editMode, memberId]);
 
     const handleInputChange = (e) => {
@@ -93,33 +125,112 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             return;
         }
         try {
+            // Update member data
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, pendidikan: educationHistory }),
+                body: JSON.stringify(formData),
             });
 
-            if (response.ok) {
-                setEditMode(false);
-            } else {
-                setError('Error updating member data');
+            if (!response.ok) {
+                throw new Error('Error updating member data');
             }
+
+            // Update education history
+            for (const edu of educationHistory) {
+                const eduResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/update/${memberId}/${edu.rowRiwayat}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        riwayat_pendidikan: edu.degree,
+                        riwayat_universitas: edu.universitas
+                    }),
+                });
+
+                if (!eduResponse.ok) {
+                    throw new Error('Error updating education history');
+                }
+            }
+
+            setEditMode(false);
+            fetchMemberData();
+            fetchEducationHistory();
         } catch (error) {
-            console.error('Error updating member data:', error);
-            setError('Error updating member data');
+            console.error('Error updating data:', error);
+            setError(error.message);
         }
+    };
+
+    const handleEducationChange = (index, field, value) => {
+        const updatedEducation = [...educationHistory];
+        updatedEducation[index] = { ...updatedEducation[index], [field]: value };
+        setEducationHistory(updatedEducation);
     };
 
     const handleNewEducationChange = (e) => {
         setNewEducation({ ...newEducation, [e.target.name]: e.target.value });
     };
 
-    const handleAddEducation = () => {
+    const handleAddEducation = async () => {
         if (newEducation.degree && newEducation.universitas) {
-            setEducationHistory([...educationHistory, newEducation]);
-            setNewEducation({ degree: '', universitas: '' });
+            const newRow = highestRowNumber + 1;
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/create/${memberId}/${newRow}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        riwayat_pendidikan: newEducation.degree,
+                        riwayat_universitas: newEducation.universitas
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add education');
+                }
+
+                const result = await response.json();
+
+                setEducationHistory([...educationHistory, {
+                    id: result.id,
+                    degree: newEducation.degree,
+                    universitas: newEducation.universitas,
+                    rowRiwayat: newRow
+                }]);
+                setHighestRowNumber(newRow);
+                setNewEducation({ degree: '', universitas: '' });
+            } catch (error) {
+                console.error('Error adding education:', error);
+                setError('Error adding education');
+            }
+        }
+    };
+
+    const handleDeleteEducation = async (id, rowRiwayat) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/delete/${memberId}/${rowRiwayat}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                // Remove the deleted education from the state
+                setEducationHistory(prevHistory => prevHistory.filter(edu => edu.id !== id));
+                // Update the highestRowNumber if necessary
+                if (rowRiwayat === highestRowNumber) {
+                    const newHighestRow = Math.max(...educationHistory.filter(edu => edu.id !== id).map(edu => edu.rowRiwayat), 0);
+                    setHighestRowNumber(newHighestRow);
+                }
+            } else {
+                setError('Error deleting education entry');
+            }
+        } catch (error) {
+            console.error('Error deleting education entry:', error);
+            setError('Error deleting education entry');
         }
     };
 
@@ -129,7 +240,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             if (validTypes.includes(file.type)) {
                 setSelectedFile(file);
-                setError(null); 
+                setError(null);
             } else {
                 setSelectedFile(null);
                 setError('Please select a valid image file (JPG, JPEG, or PNG).');
@@ -423,7 +534,12 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                                     </Select>
                                 </FormControl>
                             ) : (
-                                <Typography variant="body2" style={{ color: 'green' }}>{userInfo.status}</Typography>
+                                <Typography
+                                    variant="body2"
+                                    style={{ color: userInfo.status === 'tidak aktif' ? 'red' : 'green' }}
+                                >
+                                    {userInfo.status}
+                                </Typography>
                             )}
                         </Grid>
                     </Grid>
@@ -431,15 +547,46 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 <Grid item xs={12}>
                     <Typography variant="subtitle1" gutterBottom>Riwayat Pendidikan</Typography>
                     {educationHistory.map((edu, index) => (
-                        <Grid container key={index} spacing={1}>
-                            <Grid item xs={12} sm={3}>
+                        <Grid container key={index} spacing={1} alignItems="center">
+                            <Grid item xs={12} sm={1.5}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
-                                <Typography variant="body2">{edu.degree}</Typography>
+                                {editMode ? (
+                                    <Select
+                                        value={edu.degree}
+                                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                                        size="small"
+                                    >
+                                        <MenuItem value="S1">S1</MenuItem>
+                                        <MenuItem value="S2">S2</MenuItem>
+                                        <MenuItem value="S3">S3</MenuItem>
+                                    </Select>
+                                ) : (
+                                    <Typography variant="body2">{edu.degree}</Typography>
+                                )}
                             </Grid>
                             <Grid item xs={12} sm={3}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
-                                <Typography variant="body2">{edu.universitas}</Typography>
+                                {editMode ? (
+                                    <TextField
+                                        value={edu.universitas}
+                                        onChange={(e) => handleEducationChange(index, 'universitas', e.target.value)}
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Typography variant="body2">{edu.universitas}</Typography>
+                                )}
                             </Grid>
+                            {editMode && (
+                                <Grid item xs={12} sm={1}>
+                                    <IconButton
+                                        color="error"
+                                        onClick={() => handleDeleteEducation(edu.id, edu.rowRiwayat)}
+                                        size="small"
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Grid>
+                            )}
                         </Grid>
                     ))}
                     {editMode && (
