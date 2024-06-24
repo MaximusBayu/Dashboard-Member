@@ -129,7 +129,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             if (validTypes.includes(file.type)) {
                 setSelectedFile(file);
-                setError(null); 
+                setError(null);
             } else {
                 setSelectedFile(null);
                 setError('Please select a valid image file (JPG, JPEG, or PNG).');
@@ -423,7 +423,12 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                                     </Select>
                                 </FormControl>
                             ) : (
-                                <Typography variant="body2" style={{ color: 'green' }}>{userInfo.status}</Typography>
+                                <Typography
+                                    variant="body2"
+                                    style={{ color: userInfo.status === 'tidak aktif' ? 'red' : 'green' }}
+                                >
+                                    {userInfo.status}
+                                </Typography>
                             )}
                         </Grid>
                     </Grid>
