@@ -47,7 +47,6 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const data = await response.json();
             if (data.response) {
                 setUserInfo(data.response);
-                setEducationHistory(data.response.pendidikan || []);
             } else {
                 setError('Member not found');
             }
@@ -59,8 +58,34 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         }
     };
 
+    const fetchEducationHistory = async () => {
+        if (!memberId) return;
+    
+        setLoading(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/getAll/${memberId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            // Map the response to match our expected format
+            const formattedEducationHistory = data.response.map(item => ({
+                degree: item.riwayat_pendidikan,
+                universitas: item.riwayat_universitas
+            }));
+            setEducationHistory(formattedEducationHistory);
+            console.log(formattedEducationHistory);
+        } catch (error) {
+            console.error("Error fetching education history:", error);
+            setError('Error fetching education history');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchMemberData();
+        fetchEducationHistory();
     }, [editMode, memberId]);
 
     const handleInputChange = (e) => {
@@ -93,14 +118,18 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             return;
         }
         try {
+            const formattedEducationHistory = educationHistory.map(edu => ({
+                riwayat_pendidikan: edu.degree,
+                riwayat_universitas: edu.universitas
+            }));
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, pendidikan: educationHistory }),
+                body: JSON.stringify({ ...formData, pendidikan: formattedEducationHistory }),
             });
-
+    
             if (response.ok) {
                 setEditMode(false);
             } else {
@@ -118,7 +147,10 @@ const BiodataMember = ({ memberId: propMemberId }) => {
 
     const handleAddEducation = () => {
         if (newEducation.degree && newEducation.universitas) {
-            setEducationHistory([...educationHistory, newEducation]);
+            setEducationHistory([...educationHistory, {
+                degree: newEducation.degree,
+                universitas: newEducation.universitas
+            }]);
             setNewEducation({ degree: '', universitas: '' });
         }
     };
@@ -436,17 +468,17 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 <Grid item xs={12}>
                     <Typography variant="subtitle1" gutterBottom>Riwayat Pendidikan</Typography>
                     {educationHistory.map((edu, index) => (
-                        <Grid container key={index} spacing={1}>
-                            <Grid item xs={12} sm={3}>
-                                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
-                                <Typography variant="body2">{edu.degree}</Typography>
-                            </Grid>
-                            <Grid item xs={12} sm={3}>
-                                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
-                                <Typography variant="body2">{edu.universitas}</Typography>
-                            </Grid>
-                        </Grid>
-                    ))}
+        <Grid container key={index} spacing={1}>
+            <Grid item xs={12} sm={3}>
+                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
+                <Typography variant="body2">{edu.degree}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={3}>
+                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
+                <Typography variant="body2">{edu.universitas}</Typography>
+            </Grid>
+        </Grid>
+    ))}
                     {editMode && (
                         <Box mt={2} display="flex" alignItems="center">
                             <FormControl variant="outlined" size="small" style={{ marginRight: '10px', minWidth: 120 }}>
