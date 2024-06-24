@@ -70,7 +70,6 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            // Map the response to match our expected format
             const formattedEducationHistory = data.response.map(item => ({
                 id: item.id,
                 degree: item.riwayat_pendidikan,
@@ -79,7 +78,6 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             }));
             setEducationHistory(formattedEducationHistory);
 
-            // Find the highest row number
             const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
             setHighestRowNumber(maxRow);
 
@@ -127,30 +125,50 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             return;
         }
         try {
-            const formattedEducationHistory = educationHistory.map(edu => ({
-                riwayat_pendidikan: edu.degree,
-                riwayat_universitas: edu.universitas,
-                rowRiwayat: edu.rowRiwayat
-            }));
+            // Update member data
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ ...formData, pendidikan: formattedEducationHistory }),
+                body: JSON.stringify(formData),
             });
 
-            if (response.ok) {
-                setEditMode(false);
-                fetchMemberData();
-                fetchEducationHistory();
-            } else {
-                setError('Error updating member data');
+            if (!response.ok) {
+                throw new Error('Error updating member data');
             }
+
+            // Update education history
+            for (const edu of educationHistory) {
+                const eduResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/update/${memberId}/${edu.rowRiwayat}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        riwayat_pendidikan: edu.degree,
+                        riwayat_universitas: edu.universitas
+                    }),
+                });
+
+                if (!eduResponse.ok) {
+                    throw new Error('Error updating education history');
+                }
+            }
+
+            setEditMode(false);
+            fetchMemberData();
+            fetchEducationHistory();
         } catch (error) {
-            console.error('Error updating member data:', error);
-            setError('Error updating member data');
+            console.error('Error updating data:', error);
+            setError(error.message);
         }
+    };
+
+    const handleEducationChange = (index, field, value) => {
+        const updatedEducation = [...educationHistory];
+        updatedEducation[index] = { ...updatedEducation[index], [field]: value };
+        setEducationHistory(updatedEducation);
     };
 
     const handleNewEducationChange = (e) => {
@@ -532,11 +550,31 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                         <Grid container key={index} spacing={1} alignItems="center">
                             <Grid item xs={12} sm={3}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
-                                <Typography variant="body2">{edu.degree}</Typography>
+                                {editMode ? (
+                                    <Select
+                                        value={edu.degree}
+                                        onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                                        size="small"
+                                    >
+                                        <MenuItem value="S1">S1</MenuItem>
+                                        <MenuItem value="S2">S2</MenuItem>
+                                        <MenuItem value="S3">S3</MenuItem>
+                                    </Select>
+                                ) : (
+                                    <Typography variant="body2">{edu.degree}</Typography>
+                                )}
                             </Grid>
                             <Grid item xs={12} sm={3}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
-                                <Typography variant="body2">{edu.universitas}</Typography>
+                                {editMode ? (
+                                    <TextField
+                                        value={edu.universitas}
+                                        onChange={(e) => handleEducationChange(index, 'universitas', e.target.value)}
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Typography variant="body2">{edu.universitas}</Typography>
+                                )}
                             </Grid>
                             {editMode && (
                                 <Grid item xs={12} sm={1}>
