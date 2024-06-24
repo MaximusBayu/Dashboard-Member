@@ -3,6 +3,7 @@ import { Grid, Paper, Typography, Button, IconButton, Divider, TextField, Box, F
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { jwtDecode } from 'jwt-decode';
 
 const BiodataMember = ({ memberId: propMemberId }) => {
@@ -61,7 +62,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
 
     const fetchEducationHistory = async () => {
         if (!memberId) return;
-    
+
         setLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/getAll/${memberId}`);
@@ -77,11 +78,11 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 rowRiwayat: item.rowRiwayat
             }));
             setEducationHistory(formattedEducationHistory);
-            
+
             // Find the highest row number
             const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
             setHighestRowNumber(maxRow);
-    
+
             console.log(formattedEducationHistory);
         } catch (error) {
             console.error("Error fetching education history:", error);
@@ -128,7 +129,8 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         try {
             const formattedEducationHistory = educationHistory.map(edu => ({
                 riwayat_pendidikan: edu.degree,
-                riwayat_universitas: edu.universitas
+                riwayat_universitas: edu.universitas,
+                rowRiwayat: edu.rowRiwayat
             }));
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
@@ -137,9 +139,11 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 },
                 body: JSON.stringify({ ...formData, pendidikan: formattedEducationHistory }),
             });
-    
+
             if (response.ok) {
                 setEditMode(false);
+                fetchMemberData();
+                fetchEducationHistory();
             } else {
                 setError('Error updating member data');
             }
@@ -167,13 +171,13 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                         riwayat_universitas: newEducation.universitas
                     }),
                 });
-    
+
                 if (!response.ok) {
                     throw new Error('Failed to add education');
                 }
-    
+
                 const result = await response.json();
-                
+
                 setEducationHistory([...educationHistory, {
                     id: result.id,
                     degree: newEducation.degree,
@@ -186,6 +190,29 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 console.error('Error adding education:', error);
                 setError('Error adding education');
             }
+        }
+    };
+
+    const handleDeleteEducation = async (id, rowRiwayat) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/delete/${memberId}/${rowRiwayat}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                // Remove the deleted education from the state
+                setEducationHistory(prevHistory => prevHistory.filter(edu => edu.id !== id));
+                // Update the highestRowNumber if necessary
+                if (rowRiwayat === highestRowNumber) {
+                    const newHighestRow = Math.max(...educationHistory.filter(edu => edu.id !== id).map(edu => edu.rowRiwayat), 0);
+                    setHighestRowNumber(newHighestRow);
+                }
+            } else {
+                setError('Error deleting education entry');
+            }
+        } catch (error) {
+            console.error('Error deleting education entry:', error);
+            setError('Error deleting education entry');
         }
     };
 
@@ -502,17 +529,28 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 <Grid item xs={12}>
                     <Typography variant="subtitle1" gutterBottom>Riwayat Pendidikan</Typography>
                     {educationHistory.map((edu, index) => (
-        <Grid container key={index} spacing={1}>
-            <Grid item xs={12} sm={3}>
-                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
-                <Typography variant="body2">{edu.degree}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={3}>
-                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
-                <Typography variant="body2">{edu.universitas}</Typography>
-            </Grid>
-        </Grid>
-    ))}
+                        <Grid container key={index} spacing={1} alignItems="center">
+                            <Grid item xs={12} sm={3}>
+                                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
+                                <Typography variant="body2">{edu.degree}</Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={3}>
+                                <Typography variant="body2" style={{ fontWeight: 'bold' }}>Universitas</Typography>
+                                <Typography variant="body2">{edu.universitas}</Typography>
+                            </Grid>
+                            {editMode && (
+                                <Grid item xs={12} sm={1}>
+                                    <IconButton
+                                        color="error"
+                                        onClick={() => handleDeleteEducation(edu.id, edu.rowRiwayat)}
+                                        size="small"
+                                    >
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </Grid>
+                            )}
+                        </Grid>
+                    ))}
                     {editMode && (
                         <Box mt={2} display="flex" alignItems="center">
                             <FormControl variant="outlined" size="small" style={{ marginRight: '10px', minWidth: 120 }}>
