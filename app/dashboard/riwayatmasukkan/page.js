@@ -6,7 +6,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
-import MemberDialog from '../home/MemberDialog';
 import ReactToPrint from 'react-to-print';
 
 const MemberTable = () => {
@@ -99,7 +98,7 @@ const MemberTable = () => {
 
     const sortedMembers = statusFilter === 'aktif' ?
         members.filter(member => member.status === 'aktif') :
-        statusFilter === 'tidak-aktif' ?
+        statusFilter === 'tidak aktif' ?
             members.filter(member => member.status === 'tidak aktif') :
             members;
 
@@ -216,8 +215,6 @@ const MemberTable = () => {
                     </div>
                 </div>
             </div>
-
-            <MemberDialog open={open} onClose={handleClose} member={selectedMember} />
         </div>
     );
 };

@@ -7,7 +7,6 @@ import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import PrintIcon from '@mui/icons-material/Print';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import MemberDialog from './MemberDialog';
 import ReactToPrint from 'react-to-print';
 import BiodataMember from './memberPopup'
 
@@ -135,7 +134,7 @@ const MemberTable = () => {
 
     const sortedMembers = statusFilter === 'aktif' ?
         filteredMembers.filter(member => member.status === 'aktif') :
-        statusFilter === 'tidak-aktif' ?
+        statusFilter === 'tidak aktif' ?
             filteredMembers.filter(member => member.status === 'tidak aktif') :
             filteredMembers;
 
@@ -220,7 +219,7 @@ const MemberTable = () => {
                                                 checked={statusFilter === 'tidak aktif'}
                                                 onChange={() => setStatusFilter(statusFilter === 'tidak aktif' ? '' : 'tidak aktif')}
                                             />
-                                            <label htmlFor="tidak-aktif" className="ml-2">Tidak Aktif</label>
+                                            <label htmlFor="tidak aktif" className="ml-2">Tidak Aktif</label>
                                         </div>
                                     </div>
 
