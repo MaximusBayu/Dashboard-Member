@@ -17,6 +17,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     const [validationErrors, setValidationErrors] = useState({});
     const [userRole, setUserRole] = useState(null);
     const [memberId, setMemberId] = useState(null);
+    const [highestRowNumber, setHighestRowNumber] = useState(0);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -70,10 +71,17 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const data = await response.json();
             // Map the response to match our expected format
             const formattedEducationHistory = data.response.map(item => ({
+                id: item.id,
                 degree: item.riwayat_pendidikan,
-                universitas: item.riwayat_universitas
+                universitas: item.riwayat_universitas,
+                rowRiwayat: item.rowRiwayat
             }));
             setEducationHistory(formattedEducationHistory);
+            
+            // Find the highest row number
+            const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
+            setHighestRowNumber(maxRow);
+    
             console.log(formattedEducationHistory);
         } catch (error) {
             console.error("Error fetching education history:", error);
@@ -145,13 +153,39 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         setNewEducation({ ...newEducation, [e.target.name]: e.target.value });
     };
 
-    const handleAddEducation = () => {
+    const handleAddEducation = async () => {
         if (newEducation.degree && newEducation.universitas) {
-            setEducationHistory([...educationHistory, {
-                degree: newEducation.degree,
-                universitas: newEducation.universitas
-            }]);
-            setNewEducation({ degree: '', universitas: '' });
+            const newRow = highestRowNumber + 1;
+            try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/create/${memberId}/${newRow}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        riwayat_pendidikan: newEducation.degree,
+                        riwayat_universitas: newEducation.universitas
+                    }),
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to add education');
+                }
+    
+                const result = await response.json();
+                
+                setEducationHistory([...educationHistory, {
+                    id: result.id,
+                    degree: newEducation.degree,
+                    universitas: newEducation.universitas,
+                    rowRiwayat: newRow
+                }]);
+                setHighestRowNumber(newRow);
+                setNewEducation({ degree: '', universitas: '' });
+            } catch (error) {
+                console.error('Error adding education:', error);
+                setError('Error adding education');
+            }
         }
     };
 
