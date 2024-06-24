@@ -548,7 +548,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                     <Typography variant="subtitle1" gutterBottom>Riwayat Pendidikan</Typography>
                     {educationHistory.map((edu, index) => (
                         <Grid container key={index} spacing={1} alignItems="center">
-                            <Grid item xs={12} sm={3}>
+                            <Grid item xs={12} sm={1.5}>
                                 <Typography variant="body2" style={{ fontWeight: 'bold' }}>Pendidikan</Typography>
                                 {editMode ? (
                                     <Select
