@@ -24,7 +24,7 @@ const items = [
 const COLORS = ["#8BC34A", "#F44336", "#2196F3", "#FFEB3B"];
 
 const KomponenPage = () => {
-  const [memberCount, setMemberCount] = useState(45);
+  const [memberCount, setMemberCount] = useState(0);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get`)
