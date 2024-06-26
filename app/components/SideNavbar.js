@@ -7,22 +7,22 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import HistoryIcon from '@mui/icons-material/History';
 import { useRouter } from 'next/navigation';
-import {jwtDecode} from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
 const SideNavbar = () => {
   const router = useRouter();
-  const [isAdmin, setIsAdmin] = useState(false); 
-  const [adminName, setAdminName] = useState("Admin"); 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminName, setAdminName] = useState("Admin");
   const [avatarSrc, setAvatarSrc] = useState(null);
 
   useEffect(() => {
     const checkAdminRole = async () => {
-      const token = localStorage.getItem('token'); 
+      const token = localStorage.getItem('token');
       if (token) {
-        const decoded = jwtDecode(token); 
-        const userRole = decoded.role; 
+        const decoded = jwtDecode(token);
+        const userRole = decoded.role;
         setAdminName(decoded.username);
-        setIsAdmin(userRole === 'admin'); 
+        setIsAdmin(userRole === 'admin');
 
         try {
           const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${decoded.id}`, {
@@ -42,7 +42,7 @@ const SideNavbar = () => {
       }
     };
 
-    checkAdminRole(); 
+    checkAdminRole();
   }, []);
 
   return (

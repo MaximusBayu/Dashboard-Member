@@ -40,7 +40,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
 
     const fetchMemberData = async () => {
         if (!memberId) return;
-    
+
         setLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
@@ -51,7 +51,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             if (data.response) {
                 setUserInfo(prevInfo => ({
                     ...data.response,
-                    foto: newImageUrl || data.response.foto 
+                    foto: newImageUrl || data.response.foto
                 }));
             } else {
                 setError('Member not found');
@@ -85,7 +85,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
             setHighestRowNumber(maxRow);
 
-            
+
         } catch (error) {
             console.error("Error fetching education history:", error);
             setError('Error fetching education history');
@@ -134,7 +134,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 ...formData,
                 foto: newImageUrl || formData.foto  // Use the new imageUrl if available
             };
-    
+
             // Update member data
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
@@ -143,11 +143,11 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                 },
                 body: JSON.stringify(dataToSend),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Error updating member data');
             }
-    
+
             setEditMode(false);
             fetchMemberData();
             fetchEducationHistory();
@@ -247,20 +247,20 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             setError('Please select a file to upload.');
             return;
         }
-    
+
         const form = event.target;
         const formData = new FormData(form);
-    
+
         try {
             const response = await fetch(form.action, {
                 method: form.method,
                 body: formData,
             });
-    
+
             if (response.ok) {
                 const result = await response.json();
-                
-    
+
+
                 if (result.imageUrl) {
                     setNewImageUrl(result.imageUrl);
                     setUserInfo(prevInfo => ({

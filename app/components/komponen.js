@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
 import Carousel from "react-material-ui-carousel";
 import { Typography, Box, IconButton, Grid } from "@mui/material";
@@ -24,23 +22,26 @@ const KomponenPage = () => {
             }
             return acc;
           }, {});
-  
+
           const fakultasData = Object.entries(fakultasCount)
             .filter(([name, value]) => name !== null)
             .map(([name, value]) => ({
               name,
               value,
             }));
-  
+
           setMemberCount(data.response.length);
           setProgramStudiData(fakultasData);
-  
-          const carouselItems = data.response
-            .filter(member => member.foto) // Only include members with a non-null 'foto'
-            .map(member => ({
-              name: member.nama,
-              photoUrl: member.foto,
-            }));
+
+          // Randomly select up to 5 members with photos
+          const membersWithPhotos = data.response.filter(member => member.foto);
+          const shuffledMembers = membersWithPhotos.sort(() => 0.5 - Math.random());
+          const selectedMembers = shuffledMembers.slice(0, Math.min(5, shuffledMembers.length));
+
+          const carouselItems = selectedMembers.map(member => ({
+            name: member.nama,
+            photoUrl: member.foto,
+          }));
           setCarouselItems(carouselItems);
         }
       })
@@ -48,8 +49,6 @@ const KomponenPage = () => {
         console.error("There was an error fetching the member data!", error);
       });
   }, []);
-  
-  
 
   return (
     <div>
@@ -126,7 +125,7 @@ function PhotoCarousel({ items }) {
         </IconButton>
       )}
     >
-      {items.map((item, i) => (
+      {items.slice(0, 5).map((item, i) => (
         <PhotoCarouselItem key={i} item={item} />
       ))}
     </Carousel>
@@ -152,7 +151,6 @@ function PhotoCarouselItem(props) {
     </Box>
   );
 }
-
 
 class InfoMember extends React.Component {
   componentDidMount() {
@@ -200,7 +198,7 @@ class InfoMember extends React.Component {
           width: "250px",
         }}
       >
-        <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>Fakultas Member</h2>
+        <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>Program Studi Member</h2>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <canvas ref="canvas" width={150} height={150} />
         </div>
