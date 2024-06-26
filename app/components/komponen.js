@@ -6,26 +6,12 @@ import { Typography, Box, IconButton, Grid } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
-const items = [
-  {
-    name: "Nama Member 1",
-    photoUrl: "https://via.placeholder.com/150",
-  },
-  {
-    name: "Nama Member 2",
-    photoUrl: "https://via.placeholder.com/150",
-  },
-  {
-    name: "Nama Member 3",
-    photoUrl: "https://via.placeholder.com/150",
-  },
-];
-
 const COLORS = ["#8BC34A", "#F44336", "#2196F3", "#FFEB3B"];
 
 const KomponenPage = () => {
   const [memberCount, setMemberCount] = useState(0);
   const [programStudiData, setProgramStudiData] = useState([]);
+  const [carouselItems, setCarouselItems] = useState([]);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get`)
@@ -38,22 +24,31 @@ const KomponenPage = () => {
             }
             return acc;
           }, {});
-
+  
           const programStudiData = Object.entries(programStudiCount)
             .filter(([name, value]) => name !== null)
             .map(([name, value]) => ({
               name,
               value,
             }));
-
+  
           setMemberCount(data.response.length);
           setProgramStudiData(programStudiData);
+  
+          const carouselItems = data.response
+            .filter(member => member.foto) 
+            .map(member => ({
+              name: member.nama,
+              photoUrl: member.foto,
+            }));
+          setCarouselItems(carouselItems);
         }
       })
       .catch((error) => {
         console.error("There was an error fetching the member data!", error);
       });
   }, []);
+  
 
   return (
     <div>
@@ -63,7 +58,7 @@ const KomponenPage = () => {
       </div>
       <Grid container spacing={3} justifyContent="center">
         <Grid item xs={12} md={4}>
-          <PhotoCarousel />
+          <PhotoCarousel items={carouselItems} />
         </Grid>
         <Grid item xs={12} md={4}>
           <InfoMember data={programStudiData} />
@@ -94,7 +89,7 @@ const KomponenPage = () => {
   );
 };
 
-function PhotoCarousel() {
+function PhotoCarousel({ items }) {
   return (
     <Carousel
       next={(next, active) => (
