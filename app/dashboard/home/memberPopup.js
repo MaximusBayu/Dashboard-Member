@@ -18,6 +18,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     const [validationErrors, setValidationErrors] = useState({});
     const [userRole, setUserRole] = useState(null);
     const [memberId, setMemberId] = useState(null);
+    const [newImageUrl, setNewImageUrl] = useState(null);
     const [highestRowNumber, setHighestRowNumber] = useState(0);
 
     useEffect(() => {
@@ -48,7 +49,10 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             }
             const data = await response.json();
             if (data.response) {
-                setUserInfo(data.response);
+                setUserInfo(prevInfo => ({
+                    ...data.response,
+                    foto: newImageUrl || data.response.foto
+                }));
             } else {
                 setError('Member not found');
             }
@@ -81,7 +85,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
             setHighestRowNumber(maxRow);
 
-            console.log(formattedEducationHistory);
+
         } catch (error) {
             console.error("Error fetching education history:", error);
             setError('Error fetching education history');
@@ -93,7 +97,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     useEffect(() => {
         fetchMemberData();
         fetchEducationHistory();
-    }, [editMode, memberId]);
+    }, [editMode, memberId, newImageUrl]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -125,40 +129,29 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             return;
         }
         try {
+            // Include the new imageUrl in the formData if it exists
+            const dataToSend = {
+                ...formData,
+                foto: newImageUrl || formData.foto  // Use the new imageUrl if available
+            };
+
             // Update member data
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(dataToSend),
             });
 
             if (!response.ok) {
                 throw new Error('Error updating member data');
             }
 
-            // Update education history
-            for (const edu of educationHistory) {
-                const eduResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/update/${memberId}/${edu.rowRiwayat}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        riwayat_pendidikan: edu.degree,
-                        riwayat_universitas: edu.universitas
-                    }),
-                });
-
-                if (!eduResponse.ok) {
-                    throw new Error('Error updating education history');
-                }
-            }
-
             setEditMode(false);
             fetchMemberData();
             fetchEducationHistory();
+            setNewImageUrl(null);
         } catch (error) {
             console.error('Error updating data:', error);
             setError(error.message);
@@ -248,29 +241,44 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         }
     };
 
-    const handleFileUpload = async () => {
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
         if (!selectedFile) {
             setError('Please select a file to upload.');
             return;
         }
-        const formData = new FormData();
-        formData.append('file', selectedFile);
+
+        const form = event.target;
+        const formData = new FormData(form);
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/uploadPhoto`, {
-                method: 'POST',
+            const response = await fetch(form.action, {
+                method: form.method,
                 body: formData,
             });
 
             if (response.ok) {
-                const updatedUserInfo = await response.json();
-                setUserInfo(updatedUserInfo);
-                setSelectedFile(null);
+                const result = await response.json();
+
+
+                if (result.imageUrl) {
+                    setNewImageUrl(result.imageUrl);
+                    setUserInfo(prevInfo => ({
+                        ...prevInfo,
+                        foto: result.imageUrl
+                    }));
+                    setSelectedFile(null);
+                    setError(null);
+                } else {
+                    throw new Error('Image URL not found in server response');
+                }
             } else {
-                setError('Error uploading photo');
+                const errorText = await response.text();
+                throw new Error(`Server responded with ${response.status}: ${errorText}`);
             }
         } catch (error) {
             console.error('Error uploading photo:', error);
-            setError('Error uploading photo');
+            setError('Error uploading photo: ' + error.message);
         }
     };
 
@@ -497,23 +505,31 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                         </Grid>
                         {editMode && (
                             <Grid item>
-                                <Input
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    inputProps={{
-                                        accept: "image/jpeg, image/png, image/jpg"
-                                    }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleFileUpload}
-                                    disabled={!selectedFile}
-                                    size="small"
-                                    style={{ marginTop: '8px' }}
+                                <form
+                                    action={`${process.env.NEXT_PUBLIC_API_URL}/foto-profil/updateImage/${memberId}`}
+                                    method="post"
+                                    encType="multipart/form-data"
+                                    onSubmit={handleFormSubmit}
                                 >
-                                    Upload Photo
-                                </Button>
+                                    <Input
+                                        type="file"
+                                        name="profileImage"
+                                        onChange={handleFileChange}
+                                        inputProps={{
+                                            accept: "image/jpeg, image/png, image/jpg"
+                                        }}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={!selectedFile}
+                                        size="small"
+                                        style={{ marginTop: '8px' }}
+                                    >
+                                        Upload Photo
+                                    </Button>
+                                </form>
                             </Grid>
                         )}
                         <Grid item>

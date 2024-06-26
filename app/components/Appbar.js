@@ -5,29 +5,28 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import Switch from '@mui/material/Switch';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Avatar from '@mui/material/Avatar';
 import { styled } from '@mui/material/styles';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter } from 'next/navigation';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiList-root': {
-    padding: 0, 
-    backgroundColor: theme.palette.grey[200], 
+    padding: 0,
+    backgroundColor: theme.palette.grey[200],
   },
   '& .MuiMenuItem-root': {
-    display: 'flex', 
-    alignItems: 'center', 
+    display: 'flex',
+    alignItems: 'center',
   },
 }));
 
 const MyAppBar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [adminName, setAdminName] = useState("Admin"); 
+  const [adminName, setAdminName] = useState("Admin");
   const [avatarSrc, setAvatarSrc] = useState(null);
   const router = useRouter();
 
@@ -45,7 +44,7 @@ const MyAppBar = () => {
           });
           if (response.ok) {
             const data = await response.json();
-            setAvatarSrc(data.avatarUrl || null);
+            setAvatarSrc(data.response.foto || null);
           } else {
             console.error('Failed to fetch user data');
           }
@@ -68,9 +67,9 @@ const MyAppBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    handleMenuClose(); 
+    handleMenuClose();
     router.push('/');
-    console.log('Logout initiated!'); 
+    console.log('Logout initiated!');
   };
 
   return (
