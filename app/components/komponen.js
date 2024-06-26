@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, createRef } from "react";
 import Carousel from "react-material-ui-carousel";
 import { Typography, Box, IconButton, Grid } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -153,6 +153,11 @@ function PhotoCarouselItem(props) {
 }
 
 class InfoMember extends React.Component {
+  constructor(props) {
+    super(props);
+    this.canvasRef = createRef();
+  }
+
   componentDidMount() {
     this.drawPieChart();
   }
@@ -162,7 +167,8 @@ class InfoMember extends React.Component {
   }
 
   drawPieChart = () => {
-    const canvas = this.refs.canvas;
+    const canvas = this.canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const radius = canvas.height / 3 - 10;
     const centerX = canvas.width / 2;
@@ -200,7 +206,7 @@ class InfoMember extends React.Component {
       >
         <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>Program Studi Member</h2>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          <canvas ref="canvas" width={150} height={150} />
+          <canvas ref={this.canvasRef} width={150} height={150} />
         </div>
         <ul
           style={{

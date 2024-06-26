@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react';
 import MemberTable from './home/MemberList';
-import InfoMember from '../components/karousel';
 import BiodataMember from './home/memberPopup';
 import {jwtDecode} from 'jwt-decode';
 import KomponenPage from '../components/komponen';
