@@ -18,14 +18,14 @@ const KomponenPage = () => {
       .then((response) => response.json())
       .then((data) => {
         if (Array.isArray(data.response)) {
-          const programStudiCount = data.response.reduce((acc, member) => {
-            if (member.program_studi) {
-              acc[member.program_studi] = (acc[member.program_studi] || 0) + 1;
+          const fakultasCount = data.response.reduce((acc, member) => {
+            if (member.fakultas) {
+              acc[member.fakultas] = (acc[member.fakultas] || 0) + 1;
             }
             return acc;
           }, {});
   
-          const programStudiData = Object.entries(programStudiCount)
+          const fakultasData = Object.entries(fakultasCount)
             .filter(([name, value]) => name !== null)
             .map(([name, value]) => ({
               name,
@@ -33,10 +33,10 @@ const KomponenPage = () => {
             }));
   
           setMemberCount(data.response.length);
-          setProgramStudiData(programStudiData);
+          setProgramStudiData(fakultasData);
   
           const carouselItems = data.response
-            .filter(member => member.foto) 
+            .filter(member => member.foto) // Only include members with a non-null 'foto'
             .map(member => ({
               name: member.nama,
               photoUrl: member.foto,
@@ -48,6 +48,7 @@ const KomponenPage = () => {
         console.error("There was an error fetching the member data!", error);
       });
   }, []);
+  
   
 
   return (
@@ -145,12 +146,13 @@ function PhotoCarouselItem(props) {
       <img
         src={props.item.photoUrl}
         alt={props.item.name}
-        style={{ width: "100px", borderRadius: "4px", marginBottom: "10px" }}
+        style={{ width: "150px", height: "150px", objectFit: "cover", borderRadius: "4px", marginBottom: "10px" }}
       />
       <Typography variant="subtitle1">{props.item.name}</Typography>
     </Box>
   );
 }
+
 
 class InfoMember extends React.Component {
   componentDidMount() {
@@ -198,7 +200,7 @@ class InfoMember extends React.Component {
           width: "250px",
         }}
       >
-        <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>Program Studi Member</h2>
+        <h2 style={{ fontSize: "14px", fontWeight: "bold" }}>Fakultas Member</h2>
         <div style={{ display: "flex", justifyContent: "center" }}>
           <canvas ref="canvas" width={150} height={150} />
         </div>
