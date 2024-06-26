@@ -248,29 +248,40 @@ const BiodataMember = ({ memberId: propMemberId }) => {
         }
     };
 
-    const handleFileUpload = async () => {
+    const handleFormSubmit = async (event) => {
+        event.preventDefault();
         if (!selectedFile) {
             setError('Please select a file to upload.');
             return;
         }
-        const formData = new FormData();
-        formData.append('file', selectedFile);
+
+        const form = event.target;
+        const formData = new FormData(form);
+
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/uploadPhoto`, {
-                method: 'POST',
+            const response = await fetch(form.action, {
+                method: form.method,
                 body: formData,
             });
 
             if (response.ok) {
-                const updatedUserInfo = await response.json();
-                setUserInfo(updatedUserInfo);
-                setSelectedFile(null);
+                const result = await response.json();
+                if (result.Response === "Success" && result.imageUrl) {
+                    setUserInfo(prevInfo => ({
+                        ...prevInfo,
+                        foto: result.imageUrl
+                    }));
+                    setSelectedFile(null);
+                    setError(null);
+                } else {
+                    throw new Error('Invalid response from server');
+                }
             } else {
-                setError('Error uploading photo');
+                throw new Error('Error uploading photo');
             }
         } catch (error) {
             console.error('Error uploading photo:', error);
-            setError('Error uploading photo');
+            setError('Error uploading photo: ' + error.message);
         }
     };
 
@@ -497,23 +508,31 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                         </Grid>
                         {editMode && (
                             <Grid item>
-                                <Input
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    inputProps={{
-                                        accept: "image/jpeg, image/png, image/jpg"
-                                    }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleFileUpload}
-                                    disabled={!selectedFile}
-                                    size="small"
-                                    style={{ marginTop: '8px' }}
+                                <form
+                                    action={`${process.env.NEXT_PUBLIC_API_URL}/foto-profil/updateImage/${memberId}`}
+                                    method="post"
+                                    encType="multipart/form-data"
+                                    onSubmit={handleFormSubmit}
                                 >
-                                    Upload Photo
-                                </Button>
+                                    <Input
+                                        type="file"
+                                        name="profileImage"
+                                        onChange={handleFileChange}
+                                        inputProps={{
+                                            accept: "image/jpeg, image/png, image/jpg"
+                                        }}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={!selectedFile}
+                                        size="small"
+                                        style={{ marginTop: '8px' }}
+                                    >
+                                        Upload Photo
+                                    </Button>
+                                </form>
                             </Grid>
                         )}
                         <Grid item>
