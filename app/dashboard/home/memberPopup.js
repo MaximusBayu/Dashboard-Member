@@ -18,6 +18,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     const [validationErrors, setValidationErrors] = useState({});
     const [userRole, setUserRole] = useState(null);
     const [memberId, setMemberId] = useState(null);
+    const [newImageUrl, setNewImageUrl] = useState(null);
     const [highestRowNumber, setHighestRowNumber] = useState(0);
 
     useEffect(() => {
@@ -39,7 +40,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
 
     const fetchMemberData = async () => {
         if (!memberId) return;
-
+    
         setLoading(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/get/${memberId}`);
@@ -48,7 +49,10 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             }
             const data = await response.json();
             if (data.response) {
-                setUserInfo(data.response);
+                setUserInfo(prevInfo => ({
+                    ...data.response,
+                    foto: newImageUrl || data.response.foto // Use the new image URL if available
+                }));
             } else {
                 setError('Member not found');
             }
@@ -93,7 +97,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     useEffect(() => {
         fetchMemberData();
         fetchEducationHistory();
-    }, [editMode, memberId]);
+    }, [editMode, memberId, newImageUrl]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -125,40 +129,29 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             return;
         }
         try {
+            // Include the new imageUrl in the formData if it exists
+            const dataToSend = {
+                ...formData,
+                foto: newImageUrl || formData.foto  // Use the new imageUrl if available
+            };
+    
             // Update member data
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/member/update/${userInfo.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(dataToSend),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error updating member data');
             }
-
-            // Update education history
-            for (const edu of educationHistory) {
-                const eduResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/alur-pendidikan/update/${memberId}/${edu.rowRiwayat}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        riwayat_pendidikan: edu.degree,
-                        riwayat_universitas: edu.universitas
-                    }),
-                });
-
-                if (!eduResponse.ok) {
-                    throw new Error('Error updating education history');
-                }
-            }
-
+    
             setEditMode(false);
             fetchMemberData();
             fetchEducationHistory();
+            setNewImageUrl(null);
         } catch (error) {
             console.error('Error updating data:', error);
             setError(error.message);
@@ -254,19 +247,22 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             setError('Please select a file to upload.');
             return;
         }
-
+    
         const form = event.target;
         const formData = new FormData(form);
-
+    
         try {
             const response = await fetch(form.action, {
                 method: form.method,
                 body: formData,
             });
-
+    
             if (response.ok) {
                 const result = await response.json();
-                if (result.Response === "Success" && result.imageUrl) {
+                console.log('Server response:', result);
+    
+                if (result.imageUrl) {
+                    setNewImageUrl(result.imageUrl);  // Set the new image URL
                     setUserInfo(prevInfo => ({
                         ...prevInfo,
                         foto: result.imageUrl
@@ -274,10 +270,11 @@ const BiodataMember = ({ memberId: propMemberId }) => {
                     setSelectedFile(null);
                     setError(null);
                 } else {
-                    throw new Error('Invalid response from server');
+                    throw new Error('Image URL not found in server response');
                 }
             } else {
-                throw new Error('Error uploading photo');
+                const errorText = await response.text();
+                throw new Error(`Server responded with ${response.status}: ${errorText}`);
             }
         } catch (error) {
             console.error('Error uploading photo:', error);
