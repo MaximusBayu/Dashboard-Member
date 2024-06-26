@@ -51,7 +51,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             if (data.response) {
                 setUserInfo(prevInfo => ({
                     ...data.response,
-                    foto: newImageUrl || data.response.foto // Use the new image URL if available
+                    foto: newImageUrl || data.response.foto 
                 }));
             } else {
                 setError('Member not found');
@@ -85,7 +85,7 @@ const BiodataMember = ({ memberId: propMemberId }) => {
             const maxRow = Math.max(...formattedEducationHistory.map(item => item.rowRiwayat), 0);
             setHighestRowNumber(maxRow);
 
-            console.log(formattedEducationHistory);
+            
         } catch (error) {
             console.error("Error fetching education history:", error);
             setError('Error fetching education history');
@@ -259,10 +259,10 @@ const BiodataMember = ({ memberId: propMemberId }) => {
     
             if (response.ok) {
                 const result = await response.json();
-                console.log('Server response:', result);
+                
     
                 if (result.imageUrl) {
-                    setNewImageUrl(result.imageUrl);  // Set the new image URL
+                    setNewImageUrl(result.imageUrl);
                     setUserInfo(prevInfo => ({
                         ...prevInfo,
                         foto: result.imageUrl

@@ -32,7 +32,7 @@ const SideNavbar = () => {
           });
           if (response.ok) {
             const data = await response.json();
-            setAvatarSrc(data.avatarUrl || null);
+            setAvatarSrc(data.response.foto || null);
           } else {
             console.error('Failed to fetch user data');
           }
